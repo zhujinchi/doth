@@ -11,7 +11,8 @@ load_dotenv()
 
 
 with open(
-    "/Users/mac/blockchain/04 web3_py_simple_storage-main/SimpleStorage.sol", "r"
+    "/Users/mac/Desktop/doth/contract/ganache_rinkeby_simple_storage/SimpleStorage.sol",
+    "r",
 ) as file:
     simple_storage_file = file.read()
     # print(simple_storage_file)
