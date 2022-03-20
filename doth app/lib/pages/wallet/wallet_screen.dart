@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class FirstScreen extends StatefulWidget {
-  const FirstScreen({Key? key}) : super(key: key);
+import '../../data/system_info.dart';
+
+class WalletScreen extends StatefulWidget {
+  const WalletScreen({Key? key}) : super(key: key);
 
   @override
-  _FirstScreenState createState() => _FirstScreenState();
+  _WalletScreenState createState() => _WalletScreenState();
 }
 
-class _FirstScreenState extends State<FirstScreen> {
+class _WalletScreenState extends State<WalletScreen> {
   @override
   void initState() {
     super.initState();
@@ -27,12 +29,18 @@ class _FirstScreenState extends State<FirstScreen> {
         minTextAdapt: true,
         orientation: Orientation.portrait);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: SystemInfo.shared().backgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: const Color(0xffffffff),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        elevation: 0,
+        elevation: 1.w,
+        title: Text(
+          'Doth',
+          style: TextStyle(
+              color: SystemInfo.shared().themeColor,
+              fontWeight: FontWeight.bold),
+        ),
       ),
       //内容区域
       body: CustomScrollView(

@@ -1,5 +1,8 @@
 import 'dart:ffi';
 
+import 'package:doth/common/color_hex.dart';
+import 'package:flutter/material.dart';
+
 class SystemInfo {
   SystemInfo._privateConstructor();
 
@@ -12,4 +15,6 @@ class SystemInfo {
   //系统信息
   late Double statusBarHeight;
   late Double bottomBarHeight;
+  Color themeColor = HexColor.fromHex('2927a4');
+  Color backgroundColor = HexColor.fromHex('f5f5f5');
 }
