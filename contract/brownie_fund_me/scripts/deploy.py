@@ -40,17 +40,6 @@ def deploy_fund_me():
     print(f"deployed to {fund_me.address}")
     return fund_me
 
-    # if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-    #     price_feed_address = config["networks"][network.show_active()][
-    #         "eth_usd_price_feed"
-    #     ]
-    # else:
-    #     deploy_mocks()
-    #     price_feed_address = MockV3Aggregator[-1].address
-
-    # print(f"Contract deployed to {fund_me.address}")
-    # return fund_me
-
 
 def main():
     deploy_fund_me()

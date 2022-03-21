@@ -62,9 +62,9 @@ w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 chain_id = 1337
 
-my_address = "0x7C1f2EDF69AfCa6e182F8AcB154991ab49d5e126 "
+my_address = "0xCE56e2027efA8f4e9Bff182Bc6010Cc17B226064 "
 
-private_key = "0xaebb448c6ee7dce55641616bcc2e5f1b76572727f2c80881086f06c906ded60c"
+private_key = "0x9b0d244d47cbe96c5ac626387debbcded673ac5e72962f15a5d20f821502c686"
 
 
 # private_key = os.getenv("PRIVATE_KEY")
