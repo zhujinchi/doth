@@ -75,28 +75,64 @@ class _HomePageState extends State<HomePage> {
       },
       items: <MyBottomNavigationBarItem>[
         MyBottomNavigationBarItem(
-          icon: const Icon(Icons.money_rounded),
+          icon: Image.asset(
+            'assets/icons/bottom_borrow.png',
+            width: 24,
+            height: 24,
+          ),
+          iconUnselected: Image.asset(
+            'assets/icons/bottom_borrow_grey.png',
+            width: 24,
+            height: 24,
+          ),
           title: Text(titles[0]),
           activeColor: SystemInfo.shared().themeColor,
           inactiveColor: _inactiveColor,
           textAlign: TextAlign.center,
         ),
         MyBottomNavigationBarItem(
-          icon: const Icon(Icons.map),
+          icon: Image.asset(
+            'assets/icons/bottom_deposit.png',
+            width: 24,
+            height: 24,
+          ),
+          iconUnselected: Image.asset(
+            'assets/icons/bottom_deposit_grey.png',
+            width: 24,
+            height: 24,
+          ),
           title: Text(titles[1]),
           activeColor: SystemInfo.shared().themeColor,
           inactiveColor: _inactiveColor,
           textAlign: TextAlign.center,
         ),
         MyBottomNavigationBarItem(
-          icon: const Icon(Icons.apps),
+          icon: Image.asset(
+            'assets/icons/bottom_wallet.png',
+            width: 24,
+            height: 24,
+          ),
+          iconUnselected: Image.asset(
+            'assets/icons/bottom_wallet_grey.png',
+            width: 24,
+            height: 24,
+          ),
           title: Text(titles[2]),
           activeColor: SystemInfo.shared().themeColor,
           inactiveColor: _inactiveColor,
           textAlign: TextAlign.center,
         ),
         MyBottomNavigationBarItem(
-          icon: const Icon(Icons.person),
+          icon: Image.asset(
+            'assets/icons/bottom_profile.png',
+            width: 24,
+            height: 24,
+          ),
+          iconUnselected: Image.asset(
+            'assets/icons/bottom_profile_grey.png',
+            width: 24,
+            height: 24,
+          ),
           title: Text(titles[3]),
           activeColor: SystemInfo.shared().themeColor,
           inactiveColor: _inactiveColor,

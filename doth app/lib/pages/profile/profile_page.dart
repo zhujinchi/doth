@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       //内容区域
       body: CustomScrollView(
-        physics: const NeverScrollableScrollPhysics(),
+        //physics: const NeverScrollableScrollPhysics(),
         slivers: <Widget>[
           _buildTitleView(),
           _buildInfoTopView(),
@@ -60,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   SliverToBoxAdapter _buildTitleView() {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.only(top: 20.w, left: 15.w, right: 15.w),
+        padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
         child: Container(
             height: 80.w,
             decoration: BoxDecoration(
@@ -125,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   SliverToBoxAdapter _buildInfoTopView() {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.only(top: 20.w, left: 15.w, right: 15.w),
+        padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
         child: Container(
             height: 155.w,
             decoration: BoxDecoration(
@@ -162,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   SliverToBoxAdapter _buildInfoBottomView() {
     return SliverToBoxAdapter(
         child: Padding(
-      padding: EdgeInsets.only(top: 20.w, left: 15.w, right: 15.w),
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
       child: Container(
           height: 155.w,
           decoration: BoxDecoration(

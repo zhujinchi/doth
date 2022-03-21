@@ -69,7 +69,7 @@ class _BorrowScreenState extends State<BorrowScreen> {
   SliverToBoxAdapter _buildBorrowView() {
     return SliverToBoxAdapter(
         child: Padding(
-      padding: EdgeInsets.only(top: 20.w, left: 15.w, right: 15.w),
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
       child: Container(
         height: 155.w,
         decoration: BoxDecoration(
@@ -176,7 +176,7 @@ class _BorrowScreenState extends State<BorrowScreen> {
   SliverToBoxAdapter _buildMortgageView() {
     return SliverToBoxAdapter(
         child: Padding(
-      padding: EdgeInsets.only(top: 20.w, left: 15.w, right: 15.w),
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
       child: Container(
         height: 155.w,
         decoration: BoxDecoration(
@@ -279,7 +279,7 @@ class _BorrowScreenState extends State<BorrowScreen> {
   SliverToBoxAdapter _buildCollectionView() {
     return SliverToBoxAdapter(
         child: Padding(
-      padding: EdgeInsets.only(top: 20.w, left: 15.w, right: 15.w),
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
       child: Container(
         height: 155.w,
         decoration: BoxDecoration(
