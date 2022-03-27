@@ -134,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 boxShadow: [
                   BoxShadow(
                       color: const Color.fromRGBO(192, 192, 192, 0.5)
-                          .withOpacity(0.2),
+                          .withOpacity(0.21),
                       offset: Offset(0, 2.2.w), //阴影xy轴偏移量
                       blurRadius: 7.7.w, //阴影模糊程度
                       spreadRadius: 0 //阴影扩散程度
