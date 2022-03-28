@@ -126,7 +126,7 @@ class _ItemWidget extends StatelessWidget {
                         ? item.activeColor.withOpacity(1)
                         : item.inactiveColor ?? item.activeColor,
                   ),
-                  child: item.icon,
+                  child: isSelected ? item.icon : item.iconUnselected,
                 ),
                 if (isSelected)
                   Expanded(
@@ -134,9 +134,9 @@ class _ItemWidget extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: DefaultTextStyle.merge(
                         style: TextStyle(
-                          color: item.activeColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            color: item.activeColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13),
                         maxLines: 1,
                         textAlign: item.textAlign,
                         child: item.title,
@@ -156,12 +156,14 @@ class MyBottomNavigationBarItem {
   MyBottomNavigationBarItem({
     required this.icon,
     required this.title,
+    required this.iconUnselected,
     this.activeColor = Colors.blue,
     this.textAlign,
     this.inactiveColor,
   });
 
   final Widget icon;
+  final Widget iconUnselected;
   final Widget title;
   final Color activeColor;
   final Color? inactiveColor;
