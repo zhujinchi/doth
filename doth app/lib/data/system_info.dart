@@ -18,4 +18,5 @@ class SystemInfo {
   Color themeColor = HexColor.fromHex('2927a4');
   Color subthemeColor = HexColor.fromHex('bec4e2');
   Color backgroundColor = HexColor.fromHex('f5f5f5');
+  Color loginbackgroundColor = HexColor.fromHex('f4f4f6');
 }

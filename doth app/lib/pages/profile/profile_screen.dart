@@ -1,3 +1,5 @@
+import 'package:doth/pages/login/loghome_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -80,13 +82,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Container(
-                    width: 60.w,
-                    height: 60.w,
-                    alignment: Alignment.centerRight,
-                    child: Image.asset(
-                      'assets/icons/profile_defaultIcon.png',
-                      fit: BoxFit.fill,
+                  InkWell(
+                    onTap: () {
+                      gotoLoghomePage(context);
+                    },
+                    child: Container(
+                      width: 60.w,
+                      height: 60.w,
+                      alignment: Alignment.centerRight,
+                      child: Image.asset(
+                        'assets/icons/profile_defaultIcon.png',
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   ),
                   Padding(
@@ -236,5 +243,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         endIndent: 11.w,
       ),
     );
+  }
+
+  gotoLoghomePage(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(builder: (context) => const LogHomeScreen()),
+        (route) => route == null);
   }
 }

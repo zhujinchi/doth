@@ -1,6 +1,6 @@
 import 'package:doth/data/system_info.dart';
 import 'package:doth/data/user.dart';
-import 'package:doth/pages/profile/profile_page.dart';
+import 'package:doth/pages/profile/profile_screen.dart';
 import 'package:doth/pages/borrow/borrow_screen.dart';
 import 'package:doth/pages/deposit/deposit_screen.dart';
 import 'package:doth/pages/wallet/wallet_screen.dart';

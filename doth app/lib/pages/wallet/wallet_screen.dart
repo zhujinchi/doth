@@ -250,7 +250,7 @@ class _WalletScreenState extends State<WalletScreen>
                                 "Repayment",
                                 style: TextStyle(
                                     color: SystemInfo.shared().themeColor,
-                                    fontSize: 10.sp,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0),
                               ),
@@ -276,7 +276,7 @@ class _WalletScreenState extends State<WalletScreen>
                                 "Borrow more",
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 10.sp,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0),
                               ),
@@ -469,7 +469,7 @@ class _WalletScreenState extends State<WalletScreen>
                             "Withdraw",
                             style: TextStyle(
                                 color: SystemInfo.shared().themeColor,
-                                fontSize: 10.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0),
                           ),
@@ -495,7 +495,7 @@ class _WalletScreenState extends State<WalletScreen>
                             "Make a deposit",
                             style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 10.sp,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0),
                           ),
