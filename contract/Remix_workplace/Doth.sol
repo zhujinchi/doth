@@ -11,10 +11,7 @@ contract Doth {
     struct Loan {
         uint256 id; // loan id
         uint256 term; // loan term
-        uint256 APR; // loan APR
         uint256 usdAmount; // amount in USD
-        uint256 tokenAmount; // collateral: amount in token
-        address tokenAddress; // collateral: token address
         uint256 status; // loan status -- 0: outstanding, 1: repaid
         uint256 startTime; // loan start time
         uint256 endTime; // loan end time
@@ -39,7 +36,7 @@ contract Doth {
     // mapping of loan term to overdue duration, i.e.
     // 7/14days -> 72 hours and 30/90/180 days -> 168 hours
     mapping(uint256 => uint256) public overdueDuration;
-    uint256[] public allowedLoanTerm; // Array of allowed term
+    uint256[] public allowedTerms; // Array of allowed loan terms
 
     constructor() {
         owner = msg.sender;
@@ -54,11 +51,18 @@ contract Doth {
         overdueDuration[30 days] = 168 hours;
         overdueDuration[90 days] = 168 hours;
         overdueDuration[180 days] = 168 hours;
-        allowedLoanTerm = [7 days, 14 days, 30 days, 90 days, 180 days];
+        allowedTerms = [7 days, 14 days, 30 days, 90 days, 180 days];
         // Kovan Testnet
-        tokenPriceFeedMapping[0xd0A1E359811322d97991E03f863a0C30C2cF029C] = 0x9326BFA02ADD2366b30bacB125260Af641031331; // WETH
-        tokenPriceFeedMapping[0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa] = 0x777A68032a88E5A84678A77Af2CD65A7b3c0775a; // DAI
-        allowedTokens = [0xd0A1E359811322d97991E03f863a0C30C2cF029C, 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa];   // [WETH, DAI]
+        tokenPriceFeedMapping[
+            0xd0A1E359811322d97991E03f863a0C30C2cF029C
+        ] = 0x9326BFA02ADD2366b30bacB125260Af641031331; // WETH
+        tokenPriceFeedMapping[
+            0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa
+        ] = 0x777A68032a88E5A84678A77Af2CD65A7b3c0775a; // DAI
+        allowedTokens = [
+            0xd0A1E359811322d97991E03f863a0C30C2cF029C,
+            0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa
+        ]; // [WETH, DAI]
     }
 
     event APRChanged(uint256 APR);
@@ -70,24 +74,33 @@ contract Doth {
     // setIntialLTV - Done!
     // setMarginCallLTV - Done!
     // setLiquidationLTV - Done!
-    // TODO ****chainlink keeper****
+    // setPriceFeedContract - Done!
+    // addAllowedTokens - Done!
+    // removeAllowedTokens - Done!
     // addManager - Done!
     // removeManager - Done!
+    // TODO getLTV
+    // TODO getUserSingleTokenValue
+    // TODO getUserTotalValue
+
+    // if LTV over 83 auto repay token make LTV back to 65; 
+    // if LTV over 75 auto send warning email; 
+    // if overdue, auto send warning email
+    // TODO ****chainlink keeper****   
 
     /////// borrow ///////
     // setAPR - Done!
-    // TODO createLoan
-    // TODO liquidateLoan
-    // TODO addCollateral(address borrower, uint tokenAmount, address tokenAddress)
-    // TODO removeCollateral(address borrower, uint tokenAmount, address tokenAddress)
-    // addAllowedTokens - Done!
-    // removeAllowedTokens - Done!
-    // setPriceFeedContract - Done!
-    // setOverdueDuration
-    // setAllowedLoanTerm
+    // TODO borrow
+    // TODO repayByUSD
+    // TODO repayByCollateral - 如果参数中有address[],如果数组为空，则按[Weth, DAI]的顺序清仓，否则按数组顺序清仓
+    // setOverdueDuration - Done!
+    // addAllowedTerms - Done!
+    // removeAllowedTerms - Done!
 
     /////// deposit ///////
     // setAPY - Done!
+    // TODO deposit
+    // TODO withdraw
 
     function addAllowedTokens(address _token) public onlyManager {
         require(!isTokenExisted(_token), "Token already exists");
@@ -110,6 +123,41 @@ contract Doth {
     function isTokenExisted(address _token) public view returns (bool) {
         for (uint256 i = 0; i < allowedTokens.length; i++) {
             if (allowedTokens[i] == _token) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function setOverdueDuration(uint256 _term, uint256 _overdueDuration)
+        public
+        onlyManager
+    {
+        overdueDuration[_term] = _overdueDuration;
+        // emit
+    }
+
+    function addAllowedTerms(uint256 _term) public onlyManager {
+        require(!isTermExisted(_term), "Loan term aleady exists");
+        allowedTerms.push(_term);
+        // emit
+    }
+
+    function removeAllowedTerms(uint256 _term) public onlyManager {
+        require(isTermExisted(_term), "Loan term does not exist");
+        for (uint256 i = 0; i < allowedTerms.length; i++) {
+            if (allowedTerms[i] == _term) {
+                allowedTerms[i] = allowedTerms[allowedTerms.length - 1];
+                allowedTerms.pop();
+                // emit
+                break;
+            }
+        }
+    }
+
+    function isTermExisted(uint256 _term) public view returns (bool) {
+        for (uint256 i = 0; i < allowedTerms.length; i++) {
+            if (allowedTerms[i] == _term) {
                 return true;
             }
         }
