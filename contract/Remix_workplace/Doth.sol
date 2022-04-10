@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 // import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 /// @title Doth contract implementation
@@ -9,49 +11,38 @@ pragma solidity ^0.8.0;
 /// @notice Day Day money
 contract Doth {
     struct Loan {
-        uint256 id; // loan id
-        uint256 term; // loan term
-        uint256 usdAmount; // amount in USD
-        uint256 status; // loan status -- 0: outstanding, 1: repaid
-        uint256 startTime; // loan start time
-        uint256 endTime; // loan end time
-        uint256 LastMarginCall; // last margin call time
-        uint256 LastOverdueCall; // last overdue call time
+        uint256 principal; // principal amount for USD
+        uint256 interest;
+        uint256 timestamp;
+    }
+    struct Collateral {
+        uint256 principal;
+        uint256 interest;
+        uint256 timestamp;
     }
 
     address owner;
     address[] managers;
-    uint256 id; // auto increment
-    uint256 public APY; // Annual Percentage Yield. For deposit
-    uint256 public APR; // Annual Percentage Rate. For borrow
-    uint256 public InitialLTV; // Initial Loan to Value.
-    uint256 public MarginCallLTV; // Margin Call Loan to Value.
-    uint256 public LiquidationLTV; // Liquidation Loan to Value.
+    uint256 public APY; // decimal 8
+    uint256 public APR; // decimal 8
+    uint256 public initialLTV; // Initial Loan to Value. decimal 4
+    uint256 public marginCallLTV; // Margin Call Loan to Value. decimal 4
+    uint256 public liquidationLTV; // Liquidation Loan to Value. decimal 4
     address[] public borrowers; // Array of current outstanding borrowers
     address[] public allowedTokens; // Array of allowed token addresses
     mapping(address => address) public tokenPriceFeedMapping; // Mapping of token address to price feed address
-    mapping(address => Loan[]) public Loans; // Loan detail for each borrower
-    mapping(address => uint256) public curLoanNum; // current outstanding loan number for each borrower
-
-    // mapping of loan term to overdue duration, i.e.
-    // 7/14days -> 72 hours and 30/90/180 days -> 168 hours
-    mapping(uint256 => uint256) public overdueDuration;
-    uint256[] public allowedTerms; // Array of allowed loan terms
+    mapping(address => Loan) public loanBalance; // LoanBalance for each borrower. Only USD, decimal 2
+    mapping(address => uint256) lastMarginCall; // last margin call time
+    mapping(address => mapping(address => Collateral)) collateralBalance; // token address -> user address -> Collateral[], decimal 18
 
     constructor() {
         owner = msg.sender;
         managers = [msg.sender];
-        APR = 9;
-        APY = 3;
-        InitialLTV = 65;
-        MarginCallLTV = 75;
-        LiquidationLTV = 83;
-        overdueDuration[7 days] = 72 hours;
-        overdueDuration[14 days] = 72 hours;
-        overdueDuration[30 days] = 168 hours;
-        overdueDuration[90 days] = 168 hours;
-        overdueDuration[180 days] = 168 hours;
-        allowedTerms = [7 days, 14 days, 30 days, 90 days, 180 days];
+        APR = 9000000; // Annual Percentage Rate, decimal 8
+        APY = 3000000; // Annual Percentage Yield, decimal 8
+        initialLTV = 6500; // decimal 4
+        marginCallLTV = 7500; // decimal 4
+        liquidationLTV = 8300; // decimal 4
         // Kovan Testnet
         tokenPriceFeedMapping[
             0xd0A1E359811322d97991E03f863a0C30C2cF029C
@@ -65,56 +56,336 @@ contract Doth {
         ]; // [WETH, DAI]
     }
 
-    event APRChanged(uint256 APR);
-    event APYChanegd(uint256 APY);
-    event ManagerAdded(address manager);
-    event ManagerRemoved(address manager);
+    event Borrow(address indexed user, uint256 amount);
+    event RepayByCollateral(address indexed user, uint256 amount);
+    event RepayByUSD(address indexed user, uint256 amount);
+    event Deposit(address indexed user, address indexed token, uint256 amount);
+    event Withdraw(address indexed user, address indexed token, uint256 amount);
+    event AddAllowedToken(address indexed manager, address token);
+    event RemoveAllowedToken(address indexed manager, address token);
+    event SetPriceFeedContract(address token, address priceFeed);
+    event SetIntialLTV(uint256 LTV);
+    event SetMarginCallLTV(uint256 LTV);
+    event SetLiquidationLTV(uint256 LTV);
+    event SetAPR(uint256 APR);
+    event SetAPY(uint256 APY);
+    event AddManager(address manager);
+    event RemoveManager(address manager);
 
     /////// common ///////
     // setIntialLTV - Done!
     // setMarginCallLTV - Done!
     // setLiquidationLTV - Done!
     // setPriceFeedContract - Done!
-    // addAllowedTokens - Done!
-    // removeAllowedTokens - Done!
+    // addAllowedToken - Done!
+    // removeAllowedToken - Done!
     // addManager - Done!
     // removeManager - Done!
-    // TODO getLTV
-    // TODO getUserSingleTokenValue
-    // TODO getUserTotalValue
+    // getLTV - Done!
+    // getUserTotalValue - Done!
+    // getUserSingleTokenValue - Done!
+    // getUserSingleTokenAmount - Done!
+    // getTokenValue - Done!
+    // getUserLoanValue - Done!
+    // getDaysFromNow - Done!
+    /**
+     * if LTV over 83 auto repay token make LTV back to 65;
+     * if LTV over 75 auto send warning email;
+     * if overdue, auto send warning email
+     */
+    // TODO ****chainlink keeper****
 
-    // if LTV over 83 auto repay token make LTV back to 65; 
-    // if LTV over 75 auto send warning email; 
-    // if overdue, auto send warning email
-    // TODO ****chainlink keeper****   
+    /////// deposit ///////
+    // setAPY - Done!
+    // deposit - Done!
+    // withdraw - Done!
+    // issueDepositInterest - Done!
 
     /////// borrow ///////
     // setAPR - Done!
     // TODO borrow
-    // TODO repayByUSD
-    // TODO repayByCollateral - 如果参数中有address[],如果数组为空，则按[Weth, DAI]的顺序清仓，否则按数组顺序清仓
-    // setOverdueDuration - Done!
-    // addAllowedTerms - Done!
-    // removeAllowedTerms - Done!
+    // repayByUSD - Done!
+    // repayByCollateral - Done! -- param address[], if not Null list，repay by this order, otherwise [Weth, DAI]
+    // issueLoanInterest - Done!
+    // isBorrower - Done!
+    // removeBorrower - Done!
 
-    /////// deposit ///////
-    // setAPY - Done!
-    // TODO deposit
-    // TODO withdraw
+    function borrow(uint256 _amount) public {
+        require(_amount > 0, "Amount must be more than 0");
+        require(getUserTotalValue(msg.sender) != 0, "User has no collateral");
+        require(
+            getLTV(msg.sender) < initialLTV,
+            "Allow borrow only when LTV below initialLTV"
+        );
+        issueLoanInterest(msg.sender);
+        loanBalance[msg.sender].principal += _amount;
+        loanBalance[msg.sender].timestamp = block.timestamp;
+        // TODO send http request to back end to lend money, if not listen to event
 
-    function addAllowedTokens(address _token) public onlyManager {
-        require(!isTokenExisted(_token), "Token already exists");
-        allowedTokens.push(_token);
-        // emit
+        if (!isBorrower(msg.sender)) {
+            borrowers.push(msg.sender);
+        }
+        if (getLTV(msg.sender) > initialLTV) {
+            revert("LTV is over initialLTV, not allowed borrow");
+        }
+        emit Borrow(msg.sender, _amount);
     }
 
-    function removeAllowedTokens(address _token) public onlyManager {
+    function repayByCollateral(address[] memory _tokens, uint256 _amount)
+        public
+    {
+        require(_amount > 0, "Amount must be more than 0");
+        require(isBorrower(msg.sender), "You do not have a loan");
+        require(
+            _amount <= getUserLoanValue(msg.sender),
+            "Amount cannot more than loan balance"
+        );
+        issueLoanInterest(msg.sender);
+        for (uint256 i = 0; i < allowedTokens.length; i++) {
+            issueDepositInterest(msg.sender, allowedTokens[i]);
+        }
+        uint256 amount = _amount;
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            if (collateralBalance[_tokens[i]][msg.sender].interest >= amount) {
+                collateralBalance[_tokens[i]][msg.sender].interest -= amount;
+                amount = 0;
+            } else {
+                amount -= collateralBalance[_tokens[i]][msg.sender].interest;
+                collateralBalance[_tokens[i]][msg.sender].interest = 0;
+                if (
+                    collateralBalance[_tokens[i]][msg.sender].principal >=
+                    amount
+                ) {
+                    collateralBalance[_tokens[i]][msg.sender]
+                        .principal -= amount;
+                    amount = 0;
+                } else {
+                    amount -= collateralBalance[_tokens[i]][msg.sender]
+                        .principal;
+                    collateralBalance[_tokens[i]][msg.sender].principal = 0;
+                }
+            }
+            if (amount == 0) break;
+        }
+
+        if (getUserLoanValue(msg.sender) == 0) {
+            removeBorrower(msg.sender);
+        }
+        emit RepayByCollateral(msg.sender, _amount);
+    }
+
+    function repayByUSD(address _user, uint256 _amount) public onlyManager {
+        require(_amount > 0, "Amount must be more than 0");
+        require(isBorrower(_user), "You do not have a loan");
+        require(
+            _amount <= getUserLoanValue(_user),
+            "Amount cannot more than loan balance"
+        );
+        issueLoanInterest(_user);
+        if (loanBalance[_user].interest >= _amount) {
+            loanBalance[_user].interest -= _amount;
+        } else {
+            loanBalance[_user].interest = 0;
+            loanBalance[_user].principal =
+                loanBalance[_user].principal -
+                _amount +
+                loanBalance[_user].interest;
+        }
+        if (getUserLoanValue(_user) == 0) {
+            removeBorrower(_user);
+        }
+        emit RepayByUSD(_user, _amount);
+    }
+
+    function removeBorrower(address _user) internal {
+        for (uint256 i = 0; i < borrowers.length; i++) {
+            if (borrowers[i] == _user) {
+                borrowers[i] = borrowers[borrowers.length - 1];
+                borrowers.pop();
+                break;
+            }
+        }
+    }
+
+    function issueLoanInterest(address _user) internal {
+        uint256 timeInterval = getDaysFromNow(loanBalance[_user].timestamp);
+        if (
+            loanBalance[_user].timestamp != 0 & loanBalance[_user].principal !=
+            0 & timeInterval >= 1
+        ) {
+            // principal * (APR / 365) * days
+            loanBalance[_user].interest +=
+                (loanBalance[_user].principal * APR * (timeInterval + 1)) /
+                (365 * (10**8));
+            loanBalance[_user].timestamp = block.timestamp;
+        }
+    }
+
+    function deposit(address _token, uint256 _amount) public {
+        require(_amount > 0, "Amount must be more than 0");
+        require(isTokenExisted(_token), "Token is not allowed");
+        issueDepositInterest(msg.sender, _token);
+        IERC20(_token).transferFrom(msg.sender, address(this), _amount);
+        collateralBalance[_token][msg.sender].principal += _amount;
+        collateralBalance[_token][msg.sender].timestamp = block.timestamp;
+        emit Deposit(msg.sender, _token, _amount);
+    }
+
+    function withdraw(address _token, uint256 _amount) public {
+        // after withdraw, check the LTV if over 83, revert the transaction.
+        require(_amount > 0, "Amount cannot be 0");
+        require(
+            _amount <= getUserSingleTokenAmount(msg.sender, _token),
+            "Insufficient balance"
+        );
+        issueDepositInterest(msg.sender, _token);
+        IERC20(_token).transfer(msg.sender, _amount);
+        if (collateralBalance[_token][msg.sender].interest >= _amount) {
+            collateralBalance[_token][msg.sender].interest -= _amount;
+        } else {
+            collateralBalance[_token][msg.sender].interest = 0;
+            collateralBalance[_token][msg.sender].principal =
+                collateralBalance[_token][msg.sender].principal -
+                _amount +
+                collateralBalance[_token][msg.sender].interest;
+        }
+        if (getLTV(msg.sender) >= liquidationLTV) {
+            revert("LTV is over liquidationLTV");
+        }
+        emit Withdraw(msg.sender, _token, _amount);
+    }
+
+    // issue the interest since the last time
+    function issueDepositInterest(address _user, address _token) internal {
+        uint256 timeInterval = getDaysFromNow(
+            collateralBalance[_token][_user].timestamp
+        );
+        if (
+            collateralBalance[_token][_user].timestamp !=
+            0 & collateralBalance[_token][_user].principal !=
+            0 & timeInterval >= 1
+        ) {
+            // principal * (APY / 365) * days
+            collateralBalance[_token][_user].interest +=
+                (collateralBalance[_token][_user].principal *
+                    APY *
+                    timeInterval) /
+                (365 * (10**8));
+            collateralBalance[_token][_user].timestamp = block.timestamp;
+        }
+    }
+
+    function getDaysFromNow(uint256 _timestamp) public view returns (uint256) {
+        return ((block.timestamp - _timestamp) / 1 days);
+    }
+
+    function getLTV(address _user) public view returns (uint256) {
+        require(
+            getUserTotalValue(_user) != 0,
+            "Collateral value can not be zero"
+        );
+        if (!isBorrower(_user)) return 0;
+        else {
+            return ((getUserLoanValue(_user) * (10**4)) /
+                getUserTotalValue(_user));
+        }
+    }
+
+    function getUserLoanValue(address _user) public view returns (uint256) {
+        uint256 timeInterval = getDaysFromNow(loanBalance[_user].timestamp);
+        if (loanBalance[_user].timestamp != 0 && timeInterval >= 1) {
+            return (loanBalance[_user].principal +
+                loanBalance[_user].interest +
+                (loanBalance[_user].principal * APR * (timeInterval + 1)) /
+                (365 * (10**8)));
+        }
+        return loanBalance[_user].principal + loanBalance[_user].interest;
+    }
+
+    function isBorrower(address _user) public view returns (bool) {
+        for (uint256 i = 0; i < borrowers.length; i++) {
+            if (borrowers[i] == _user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getUserTotalValue(address _user) public view returns (uint256) {
+        uint256 totalValue = 0;
+        for (uint256 i = 0; i < allowedTokens.length; i++) {
+            totalValue += getUserSingleTokenValue(_user, allowedTokens[i]);
+        }
+        return totalValue;
+    }
+
+    function getUserSingleTokenValue(address _user, address _token)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 singleTokenTotalAmount = getUserSingleTokenAmount(
+            _user,
+            _token
+        );
+        if (singleTokenTotalAmount == 0) {
+            return 0;
+        }
+        (uint256 price, uint256 decimals) = getTokenValue(_token);
+        return ((singleTokenTotalAmount * price * (10**2)) /
+            (10**(decimals + 18)));
+    }
+
+    function getUserSingleTokenAmount(address _user, address _token)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 timeInterval = getDaysFromNow(
+            collateralBalance[_token][_user].timestamp
+        );
+        if (
+            collateralBalance[_token][_user].timestamp != 0 && timeInterval >= 1
+        ) {
+            return (collateralBalance[_token][_user].principal +
+                collateralBalance[_token][_user].interest +
+                (collateralBalance[_token][_user].principal *
+                    APY *
+                    timeInterval) /
+                (365 * (10**8)));
+        }
+        return (collateralBalance[_token][_user].principal +
+            collateralBalance[_token][_user].interest);
+    }
+
+    function getTokenValue(address _token)
+        public
+        view
+        returns (uint256, uint256)
+    {
+        // priceFeedAddress
+        address priceFeedAddress = tokenPriceFeedMapping[_token];
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(
+            priceFeedAddress
+        );
+        (, int256 price, , , ) = priceFeed.latestRoundData();
+        uint256 decimals = uint256(priceFeed.decimals());
+        return (uint256(price), decimals);
+    }
+
+    function addAllowedToken(address _token) public onlyManager {
+        require(!isTokenExisted(_token), "Token already exists");
+        allowedTokens.push(_token);
+        emit AddAllowedToken(msg.sender, _token);
+    }
+
+    function removeAllowedToken(address _token) public onlyManager {
         require(isTokenExisted(_token), "Token does not exist");
         for (uint256 i = 0; i < allowedTokens.length; i++) {
             if (allowedTokens[i] == _token) {
                 allowedTokens[i] = allowedTokens[allowedTokens.length - 1];
                 allowedTokens.pop();
-                // emit
+                emit RemoveAllowedToken(msg.sender, _token);
                 break;
             }
         }
@@ -129,76 +400,41 @@ contract Doth {
         return false;
     }
 
-    function setOverdueDuration(uint256 _term, uint256 _overdueDuration)
-        public
-        onlyManager
-    {
-        overdueDuration[_term] = _overdueDuration;
-        // emit
-    }
-
-    function addAllowedTerms(uint256 _term) public onlyManager {
-        require(!isTermExisted(_term), "Loan term aleady exists");
-        allowedTerms.push(_term);
-        // emit
-    }
-
-    function removeAllowedTerms(uint256 _term) public onlyManager {
-        require(isTermExisted(_term), "Loan term does not exist");
-        for (uint256 i = 0; i < allowedTerms.length; i++) {
-            if (allowedTerms[i] == _term) {
-                allowedTerms[i] = allowedTerms[allowedTerms.length - 1];
-                allowedTerms.pop();
-                // emit
-                break;
-            }
-        }
-    }
-
-    function isTermExisted(uint256 _term) public view returns (bool) {
-        for (uint256 i = 0; i < allowedTerms.length; i++) {
-            if (allowedTerms[i] == _term) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     function setPriceFeedContract(address _token, address _priceFeed)
         public
         onlyManager
     {
         tokenPriceFeedMapping[_token] = _priceFeed;
-        // emit
+        emit SetPriceFeedContract(_token, _priceFeed);
     }
 
     function setIntialLTV(uint256 _LTV) public onlyManager {
-        InitialLTV = _LTV;
-        // emit
+        initialLTV = _LTV;
+        emit SetIntialLTV(_LTV);
     }
 
     function setMarginCallLTV(uint256 _LTV) public onlyManager {
-        MarginCallLTV = _LTV;
-        // emit
+        marginCallLTV = _LTV;
+        emit SetMarginCallLTV(_LTV);
     }
 
     function setLiquidationLTV(uint256 _LTV) public onlyManager {
-        LiquidationLTV = _LTV;
-        // emit
+        liquidationLTV = _LTV;
+        emit SetLiquidationLTV(_LTV);
     }
 
     /// @notice Set the new APR
     /// @param _APR The new APR you want to set
     function setAPR(uint256 _APR) public onlyManager {
         APR = _APR;
-        emit APRChanged(_APR);
+        emit SetAPR(_APR);
     }
 
     /// @notice Set the new APY
     /// @param _APY The new APY you want to set
     function setAPY(uint256 _APY) public onlyManager {
         APY = _APY;
-        emit APRChanged(_APY);
+        emit SetAPY(_APY);
     }
 
     /// @notice Add a manager
@@ -207,7 +443,7 @@ contract Doth {
         require(owner == msg.sender, "Only Owner can add manager");
         require(!isManager(_manager), "Manager already exists");
         managers.push(_manager);
-        emit ManagerAdded(_manager);
+        emit AddManager(_manager);
     }
 
     /// @notice Remove a manager
@@ -219,7 +455,7 @@ contract Doth {
             if (managers[i] == _manager) {
                 managers[i] = managers[managers.length - 1];
                 managers.pop();
-                emit ManagerRemoved(_manager);
+                emit RemoveManager(_manager);
                 break;
             }
         }
