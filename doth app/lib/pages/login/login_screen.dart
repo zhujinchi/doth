@@ -132,7 +132,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           maxLines: 1,
                           maxLength: 12,
                           autofocus: false,
-                          obscureText: !passwordVisible,
                           style: TextStyle(fontSize: 16.sp),
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -240,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontSize: 16.sp),
                           ),
                           onSubmitted: (str) {},
-                          textInputAction: TextInputAction.search,
+                          textInputAction: TextInputAction.done,
                           onChanged: (content) {
                             setState(() {});
                           },
