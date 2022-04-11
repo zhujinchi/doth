@@ -37,7 +37,7 @@ class Wallet(db.Model):
     __tablename__ = "wallet"
     id = db.Column(db.Integer, primary_key=True)  # id号(独一无二的)
     name = db.Column(db.String(32), unique=True)  # 钱包名字
-    manager_id = db.Column(db.Integer, db.ForeignKey("manager.id"))  # 所属老师的id
+    manager_id = db.Column(db.Integer, db.ForeignKey("manager.id"))  # 所属管理员的id
     moneys = db.relationship("money", backref="wallet")  # 余额关系关联
 
 
