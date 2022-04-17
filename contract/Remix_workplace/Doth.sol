@@ -180,9 +180,9 @@ contract Doth is KeeperCompatibleInterface {
             collateralBalance[_token][_user].timestamp
         );
         if (
-            collateralBalance[_token][_user].timestamp !=
-            0 & collateralBalance[_token][_user].principal !=
-            0 & timeInterval >= 1
+            (collateralBalance[_token][_user].timestamp != 0) &&
+            (collateralBalance[_token][_user].principal != 0) &&
+            (timeInterval >= 1)
         ) {
             // principal * (APY / 365) * days
             collateralBalance[_token][_user].interest +=
@@ -330,8 +330,9 @@ contract Doth is KeeperCompatibleInterface {
     function issueLoanInterest(address _user) internal {
         uint256 timeInterval = getDaysFromNow(loanBalance[_user].timestamp);
         if (
-            loanBalance[_user].timestamp != 0 & loanBalance[_user].principal !=
-            0 & timeInterval >= 1
+            (loanBalance[_user].timestamp != 0) &&
+            (loanBalance[_user].principal != 0) &&
+            (timeInterval >= 1)
         ) {
             // principal * (APR / 365) * days
             loanBalance[_user].interest +=
@@ -375,9 +376,9 @@ contract Doth is KeeperCompatibleInterface {
         returns (bool)
     {
         if (_tokens.length != allowedTokens.length) return false;
-        for (uint256 i = 0; i <= _tokens.length; i++) {
+        for (uint256 i = 0; i < _tokens.length; i++) {
             bool flag = false;
-            for (uint256 j = 0; j <= allowedTokens.length; j++) {
+            for (uint256 j = 0; j < allowedTokens.length; j++) {
                 if (_tokens[i] == allowedTokens[j]) flag = true;
             }
             if (!flag) return false;
