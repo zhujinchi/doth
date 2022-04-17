@@ -19,7 +19,7 @@ contract Doth is KeeperCompatibleInterface {
         uint256 timestamp;
     }
 
-    address owner;
+    address public owner;
     address[] managers;
     uint256 public APY; // decimal 8
     uint256 public APR; // decimal 8
@@ -79,7 +79,7 @@ contract Doth is KeeperCompatibleInterface {
      * if LTV over 75 auto send warning email;
      * if overdue, auto send warning email
      */
-    // TODO ****chainlink keeper****
+    // ****chainlink keeper****
     function checkUpkeep(
         bytes calldata /* checkData */
     )
@@ -382,7 +382,7 @@ contract Doth is KeeperCompatibleInterface {
             }
             if (!flag) return false;
         }
-        return false;
+        return true;
     }
 
     /////// Common ///////
@@ -591,17 +591,26 @@ contract Doth is KeeperCompatibleInterface {
         return false;
     }
 
+    /// @notice Set the initial LTV
+    /// @param _LTV initial LTV, must be below marginCallLTV and liquidationLTV
     function setIntialLTV(uint256 _LTV) external onlyManager {
+        require(_LTV < marginCallLTV && _LTV < liquidationLTV);
         initialLTV = _LTV;
         emit SetIntialLTV(_LTV);
     }
 
+    /// @notice Set the margin call LTV
+    /// @param _LTV margin call LTV, must be over initialLTV and below liquidationLTV
     function setMarginCallLTV(uint256 _LTV) external onlyManager {
+        require(_LTV > initialLTV && _LTV < liquidationLTV);
         marginCallLTV = _LTV;
         emit SetMarginCallLTV(_LTV);
     }
 
+    /// @notice Set the liquidation LTV
+    /// @param _LTV liquidation LTV, must be over initialLTV and marginCallLTV
     function setLiquidationLTV(uint256 _LTV) external onlyManager {
+        require(_LTV > marginCallLTV && _LTV > initialLTV);
         liquidationLTV = _LTV;
         emit SetLiquidationLTV(_LTV);
     }
@@ -609,6 +618,13 @@ contract Doth is KeeperCompatibleInterface {
     /// @notice Set the new APR
     /// @param _APR The new APR you want to set
     function setAPR(uint256 _APR) external onlyManager {
+        for (
+            uint256 borrowerIndex = 0;
+            borrowerIndex < borrowers.length;
+            borrowerIndex++
+        ) {
+            issueLoanInterest(borrowers[borrowerIndex]);
+        }
         APR = _APR;
         emit SetAPR(_APR);
     }
@@ -616,6 +632,23 @@ contract Doth is KeeperCompatibleInterface {
     /// @notice Set the new APY
     /// @param _APY The new APY you want to set
     function setAPY(uint256 _APY) external onlyManager {
+        for (
+            uint256 depositorIndex = 0;
+            depositorIndex < depositors.length;
+            depositorIndex++
+        ) {
+            for (
+                uint256 tokenIndex = 0;
+                tokenIndex < allowedTokens.length;
+                tokenIndex++
+            ) {
+                issueDepositInterest(
+                    depositors[depositorIndex],
+                    allowedTokens[tokenIndex]
+                );
+            }
+        }
+
         APY = _APY;
         emit SetAPY(_APY);
     }
