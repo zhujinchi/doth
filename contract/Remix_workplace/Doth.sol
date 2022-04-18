@@ -123,8 +123,10 @@ contract Doth is KeeperCompatibleInterface {
         for (uint256 i = 0; i < allowedTokens.length; i++) {
             issueDepositInterest(_user, allowedTokens[i]);
         }
-        uint256 amount = (getUserTotalValue(_user) *
-            (liquidationLTV - initialLTV)) / (10000 - initialLTV);
+        uint256 amount = (getUserLoanValue(_user) *
+            (10**4) -
+            initialLTV *
+            getUserTotalValue(_user)) / (10**4 - initialLTV);
         _repayByCollateral(_user, allowedTokens, amount);
         emit Liquidate(_user, amount);
         emit EmailCall(_user, 2);
@@ -396,8 +398,8 @@ contract Doth is KeeperCompatibleInterface {
     // getDaysFromNow - Done!
     // modifier onlyManager() - Done!
     // modifier onlyOwner() - Done!
+
     function getLTV(address _user) public view returns (uint256) {
-        require(getUserTotalValue(_user) != 0);
         if (!isBorrower(_user)) return 0;
         else {
             return ((getUserLoanValue(_user) * (10**4)) /
