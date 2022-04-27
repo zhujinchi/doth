@@ -1,65 +1,61 @@
-# pip install flask-sqlalchemy
-from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:123456@127.0.0.1:3306/test'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + "/home/lmp/test.db"
+# 数据库配置
+class Config(object):
+    """配置参数"""
+    # sqlalchemy的配置参数
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/doth_database.db'
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'xxx'
+    # 设置sqlalchemy自动更新跟踪数据库
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+
+# 将配置连接到数据库
+app.config.from_object(Config)
+
+# 创建数据库alchemy工具对象
 db = SQLAlchemy(app)
 
 
-# 用户表
-class User(db.Model):
-    __tablename__ = "user"
-    id = db.Column(db.Integer, primary_key=True)  # id号(独一无二的)
-    name = db.Column(db.String(64), nullable=False)  # 姓名
-    gender = db.Column(db.Enum("男", "女"), nullable=False)  # 性别
-    phone = db.Column(db.String(11), unique=True, nullable=False)  # 手机号
-    wallets = db.relationship("wallet", secondary="user_wallet", backref="users")  # 关系关联
-    moneys = db.relationship("money", backref="user")  # 关系关联
+# 创建数据库用户类
+class User(db.model):
+    """用户表"""
+    __tablename__ = "doth_users"  # 指明数据库的表名
+
+    user_id = db.Column(db.Integer, primary_key=True)  # 整型的主键，会默认设置为自增主键
+    user_name = db.Column(db.String(64), unique=True)
+    user_email = db.Column(db.String(128), unique=True)
+    user_password = db.Column(db.String(128))
+    # role = db.Colum(db.Int(4))
 
 
-# 用户-钱包中间表
-class UserWallet(db.Model):
-    __tablename__ = "user_wallet"
-    id = db.Column(db.Integer, primary_key=True)  # id号(独一无二的)
-    users_id = db.Column(db.Integer, db.ForeignKey("user.id"))  # 用户的id
-    wallets_id = db.Column(db.Integer, db.ForeignKey("wallet.id"))  # 钱包的id
+
+# 创建数据库钱包类
+class Wallet(db.model):
+    """钱包表"""
+    __tablename__ = "doth_wallet"
+
+    wallet_id = db.Column(db.Integer, primary_key=True)  # 整型的主键，会默认设置为自增主键
+    wallet_address = db.Column(db.String(128), unique=True)  # 不知道要不要设置成unique
 
 
-# 钱包表
-class Wallet(db.Model):
-    __tablename__ = "wallet"
-    id = db.Column(db.Integer, primary_key=True)  # id号(独一无二的)
-    name = db.Column(db.String(32), unique=True)  # 钱包名字
-    manager_id = db.Column(db.Integer, db.ForeignKey("manager.id"))  # 所属管理员的id
-    moneys = db.relationship("money", backref="wallet")  # 余额关系关联
+# 创建数据库管理员类 用户后台管理系统的登陆和认证
+class Manager(db.model):
+    """管理员表"""
+    __tablename__ = "doth_manager"
+
+    manager_id = db.Column(db.Integer, primary_key=True)  # 整型的主键，会默认设置为自增主键
+    manager_password = password = db.Column(db.String(128))
 
 
-# 管理员表
-class Manager(db.Model):
-    __tablename__ = "manager"
-    id = db.Column(db.Integer, primary_key=True)  # id号(独一无二的)
-    name = db.Column(db.String(32), unique=True)  # 姓名
-    phone = db.Column(db.String(11), unique=True, nullable=False)  # 手机号
-    gender = db.Column(db.Enum("男", "女"), nullable=False)  # 性别
-    wallet = db.relationship("wallet", backref="manager")  # 所管钱包
+# 创建交易类
+class Deal(db.model):
+    """管理员表"""
+    __tablename__ = "doth_deal"
 
-
-# 余额表
-class Money(db.Model):
-    __tablename__ = "money"
-    id = db.Column(db.Integer, primary_key=True)  # id号(独一无二的)
-    my_money = db.Column(db.String(32), unique=True)  # 钱
-    wallet_id = db.Column(db.Integer, db.ForeignKey("wallet.id"))  # 所属钱包
-    users_id = db.Column(db.Integer, db.ForeignKey("user.id"))  # 所属用户
-
-
-if __name__ == "__main__":
-    db.create_all()
-    # db.drop_all()
+    deal_id = db.Column(db.Integer, primary_key=True)  # 整型的主键，会默认设置为自增主键
+    wallet_address = wallet_address = db.Column(db.String(128), unique=True) # 不知道要不要设置成unique

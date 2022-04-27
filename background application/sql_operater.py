@@ -1,4 +1,4 @@
-from learn_sql import db, User, Money, Manager, Wallet
+from database_model_old import db, User, Money, Manager, Wallet
 
 # 增
 
@@ -131,11 +131,6 @@ print("--------------------------")
 # for i in range(1, 7):
 #     c = wallet.query.filter(wallet.id == i).update({"manager_id": i})
 # db.session.commit()
-
-
-
-
-
 
 # 查询钱包
 cs = wallet.query.filter(wallet.id >= 2).all()
