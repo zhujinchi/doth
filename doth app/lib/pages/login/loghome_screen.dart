@@ -1,5 +1,6 @@
 import 'package:doth/common/color_hex.dart';
 import 'package:doth/pages/login/login_screen.dart';
+import 'package:doth/pages/login/register_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -138,7 +139,7 @@ class _LogHomeScreenState extends State<LogHomeScreen> {
             EdgeInsets.only(left: 82.w, right: 82.w, top: 5.5.w, bottom: 5.5.w),
         child: OutlinedButton(
           onPressed: () {
-            //gotoLoginPage(context);
+            gotoRegisterPage(context);
           },
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -247,5 +248,10 @@ class _LogHomeScreenState extends State<LogHomeScreen> {
   gotoLoginPage(BuildContext context) {
     Navigator.of(context)
         .push(CupertinoPageRoute(builder: (context) => const LoginScreen()));
+  }
+
+  gotoRegisterPage(BuildContext context) {
+    Navigator.of(context)
+        .push(CupertinoPageRoute(builder: (context) => const RegisterScreen()));
   }
 }

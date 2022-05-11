@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../common/color_hex.dart';
 import '../../data/system_info.dart';
 
 class DepositScreen extends StatefulWidget {
@@ -13,6 +14,9 @@ class DepositScreen extends StatefulWidget {
 }
 
 class _DepositScreenState extends State<DepositScreen> {
+  final TextEditingController _amountDepositedEditingController =
+      TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -44,20 +48,307 @@ class _DepositScreenState extends State<DepositScreen> {
       ),
       //内容区域
       body: CustomScrollView(
-        physics: const NeverScrollableScrollPhysics(),
         slivers: <Widget>[
-          _buildPhoneView(),
+          _buildPaywithView(),
+          _buildDepositView(),
+          _buildConfirmButton(),
+          _buildNotificationText(),
         ],
       ),
     );
   }
 
-  SliverToBoxAdapter _buildPhoneView() {
+  SliverToBoxAdapter _buildPaywithView() {
     return SliverToBoxAdapter(
-      child: SizedBox(
+        child: Padding(
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
+      child: Container(
+        height: 155.w,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(8.w)),
+            boxShadow: [
+              BoxShadow(
+                  color:
+                      const Color.fromRGBO(192, 192, 192, 0.5).withOpacity(0.2),
+                  offset: Offset(0, 2.2.w), //阴影xy轴偏移量
+                  blurRadius: 7.7.w, //阴影模糊程度
+                  spreadRadius: 0 //阴影扩散程度
+                  )
+            ]),
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(left: 24.w, top: 18.w),
+              child: Text(
+                'Pay with',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 23.sp,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 70.w, left: 20.w),
+              child: Container(
+                width: 35.w,
+                height: 35.w,
+                alignment: Alignment.centerRight,
+                child: Image.asset(
+                  'assets/icons/borrow_btc.png',
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 64.w, right: 24.w, top: 76.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    'BTC',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 23.sp,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.black87.withOpacity(0.3),
+                    size: 20.w,
+                  )
+                ],
+              ),
+            ),
+            Padding(
+                padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Available:',
+                      style: TextStyle(
+                        color: Colors.black87.withOpacity(0.6),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                    Text(
+                      '10000000.0000',
+                      style: TextStyle(
+                        color: Colors.black87.withOpacity(0.6),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ],
+                )),
+            Padding(
+              padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
+              child: Divider(
+                color: Colors.grey[400],
+                height: 0.w,
+                thickness: 0.5.w,
+                indent: 11.w,
+                endIndent: 11.w,
+              ),
+            )
+          ],
+        ),
+      ),
+    ));
+  }
+
+  SliverToBoxAdapter _buildDepositView() {
+    return SliverToBoxAdapter(
+        child: Padding(
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
+      child: Container(
+        height: 155.w,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(8.w)),
+            boxShadow: [
+              BoxShadow(
+                  color:
+                      const Color.fromRGBO(192, 192, 192, 0.5).withOpacity(0.2),
+                  offset: Offset(0, 2.2.w), //阴影xy轴偏移量
+                  blurRadius: 7.7.w, //阴影模糊程度
+                  spreadRadius: 0 //阴影扩散程度
+                  )
+            ]),
+        child: Stack(children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 24.w, top: 18.w),
+            child: Text(
+              'Deposit amount',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 23.sp,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 20.w, top: 122.w),
+            child: Text(
+              '3.5% p.a. Expected to arrive within 2hours',
+              style: TextStyle(
+                color: Colors.black87.withOpacity(0.9),
+                fontWeight: FontWeight.bold,
+                fontSize: 13.sp,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 28.w, top: 72.w),
+            child: SizedBox(
+                width: 260.w,
+                height: 40.w,
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  cursorColor: HexColor.fromHex('5C8987'),
+                  cursorHeight: 18.w,
+                  cursorRadius: Radius.circular(2.w),
+                  cursorWidth: 2.w,
+                  controller: _amountDepositedEditingController,
+                  showCursor: true,
+                  maxLines: 1,
+                  maxLength: 20,
+                  autofocus: false,
+                  style: TextStyle(fontSize: 18.w),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    isCollapsed: false,
+                    counterText: '',
+                    hintText: 'Please enter the deposit amount',
+                    hintStyle: TextStyle(
+                        color: Colors.grey.withOpacity(0.5), fontSize: 18.w),
+                  ),
+                  onSubmitted: (str) {},
+                  textInputAction: TextInputAction.done,
+                  onChanged: (content) {
+                    setState(() {});
+                  },
+                )),
+          ),
+          Padding(
+              padding: EdgeInsets.only(left: 320.w, top: 78.w, right: 30.w),
+              child: _amountDepositedEditingController.text.isNotEmpty
+                  ? SizedBox(
+                      width: 30.w,
+                      height: 30.w,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _amountDepositedEditingController.clear();
+                          });
+                        },
+                        child: Icon(Icons.cancel_rounded,
+                            size: 20.w, color: Colors.grey.withOpacity(0.4)),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                      ),
+                    )
+                  : null),
+          Padding(
+            padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
+            child: Divider(
+              color: Colors.grey[400],
+              height: 0.w,
+              thickness: 0.5.w,
+              indent: 11.w,
+              endIndent: 11.w,
+            ),
+          )
+        ]),
+      ),
+    ));
+  }
+
+  SliverToBoxAdapter _buildConfirmButton() {
+    return SliverToBoxAdapter(
+        child: Padding(
+      padding: EdgeInsets.only(bottom: 00.w),
+      child: Container(
         width: 390.w,
-        height: 55.w,
-        //color: Colors.red,
+        height: 70.w,
+        padding:
+            EdgeInsets.only(left: 15.w, right: 15.w, top: 15.w, bottom: 0.w),
+        child: OutlinedButton(
+          onPressed: () {},
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.w),
+            ),
+            backgroundColor: SystemInfo.shared().themeColor,
+            side:
+                BorderSide(width: 0.5.w, color: SystemInfo.shared().themeColor),
+          ),
+          child: Text(
+            "Confirm the deposit",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0),
+          ),
+        ),
+      ),
+    ));
+  }
+
+  SliverToBoxAdapter _buildNotificationText() {
+    return SliverToBoxAdapter(
+      child: Container(
+        height: 180.w,
+        padding: EdgeInsets.only(top: 20.w),
+        child: Stack(
+          children: <Widget>[
+            Padding(
+                padding: EdgeInsets.only(left: 40.w),
+                child: Icon(
+                  Icons.question_mark_sharp,
+                  size: 10.w,
+                )),
+            Padding(
+                padding: EdgeInsets.only(left: 50.w, right: 50.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'There is no upper limit on the deposit, no interest is paid for the',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: HexColor.fromHex('2a28a5'),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 9.sp,
+                      ),
+                    ),
+                    Text(
+                      'time being, and the withdrawal can be made at any time at the',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: HexColor.fromHex('2a28a5'),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 9.sp,
+                      ),
+                    ),
+                    Text(
+                      'daily interest rate.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: HexColor.fromHex('2a28a5'),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 9.sp,
+                      ),
+                    ),
+                  ],
+                ))
+          ],
+        ),
       ),
     );
   }

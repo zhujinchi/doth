@@ -38,7 +38,7 @@ class User(db.model):
 class Wallet(db.model):
     """钱包表"""
     __tablename__ = "doth_wallet"
-
+    # user_id 关联
     wallet_id = db.Column(db.Integer, primary_key=True)  # 整型的主键，会默认设置为自增主键
     wallet_address = db.Column(db.String(128), unique=True)  # 不知道要不要设置成unique
 
@@ -54,7 +54,7 @@ class Manager(db.model):
 
 # 创建交易类
 class Deal(db.model):
-    """管理员表"""
+    """交易表"""
     __tablename__ = "doth_deal"
 
     deal_id = db.Column(db.Integer, primary_key=True)  # 整型的主键，会默认设置为自增主键

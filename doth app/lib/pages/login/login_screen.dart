@@ -152,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Padding(
                       padding:
-                          EdgeInsets.only(left: 250.w, top: 4.w, right: 30.w),
+                          EdgeInsets.only(left: 270.w, top: 4.w, right: 30.w),
                       child: _accountEditingController.text.isNotEmpty
                           ? IconButton(
                               //如果文本长度不为空则显示清除按钮
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding:
                         EdgeInsets.only(left: 30.w, top: 55.w, right: 30.w),
                     child: Divider(
-                      color: Colors.grey[300],
+                      color: Colors.grey[300]!.withOpacity(0),
                       height: 0.w,
                       thickness: 0.5.w,
                       indent: 11.w,
@@ -196,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Stack(
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(left: 280.w, top: 5.w),
+                      padding: EdgeInsets.only(left: 265.w, top: 5.w),
                       child: IconButton(
                         onPressed: () {
                           setState(() {
@@ -247,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Padding(
                       padding:
-                          EdgeInsets.only(left: 250.w, top: 4.w, right: 30.w),
+                          EdgeInsets.only(left: 235.w, top: 4.w, right: 30.w),
                       child: _passWordEditingController.text.isNotEmpty
                           ? IconButton(
                               //如果文本长度不为空则显示清除按钮
