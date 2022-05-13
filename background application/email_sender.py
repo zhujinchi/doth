@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-@File    :   gmail_sender.py
+@File    :   email_sender.py
 @Time    :   2022-05-13 21:02:47
 @Author  :   Zejiang Yang
 '''
