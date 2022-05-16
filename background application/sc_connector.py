@@ -6,6 +6,8 @@
 '''
 
 import json
+import requests
+import os
 from web3 import Web3, exceptions
 
 
@@ -15,10 +17,11 @@ INFURA_URL = "https://kovan.infura.io/v3/e3b3cf0628f04f2c9e54ccd14355ff57"
 CHAIN_ID = 42  # kovan
 DOTH_CONTRACT_ADDRESS = '0x80596450a684A8c43e57c1B246C690Cb85EA2138'
 
-# load abi
-with open('abi.json', 'r') as f:
-    ABI = json.load(f)
+ETHERSCAN_API_KEY = 'GFPQSXAEEHNXKPDD3VXYH8GI71HSDH5FHC'
 
+# load abi
+with open('./abi/doth_abi.json', 'r') as f:
+    ABI = json.load(f)
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 doth = w3.eth.contract(address=DOTH_CONTRACT_ADDRESS, abi=ABI)
 
@@ -37,7 +40,7 @@ def sign_send_transaction(txn):
     tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
     tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
 
-    # 超时处理
+    # Timeout handling
     # try:
     #     tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=120)
     # except exceptions.TimeExhausted as e:
@@ -150,10 +153,6 @@ def getAPY():
     return doth.functions.APY().call() / 1e8
 
 
-def getAllowedTokens():
-    return doth.functions.allowedTokens().call()
-
-
 def getDepositors():
     return doth.functions.getDepositors().call()
 
@@ -217,8 +216,55 @@ def getTokenPriceFeedAddress(token):
     return doth.functions.tokenPriceFeedMapping(token).call()
 
 
+##
+# For Backend View
+##
+
+# get Token symbol
+def getTokenSymbol(token):
+    url = f'https://api-kovan.etherscan.io/api?module=contract&action=getabi&address={token}&apikey={ETHERSCAN_API_KEY}'
+    abi = requests.get(url).json()['result']
+    contract = w3.eth.contract(address=token, abi=abi)
+    return contract.functions.symbol().call()
+
+# Check, format and save token info, {symbol, abi}
+def save_token_abi():
+    tokens, _ = getTotalTokens()
+    for token in tokens:
+        if not os.path.exists(f'./abi/{token}.json'):
+            symbol = getTokenSymbol(token)
+            url = f'https://api-kovan.etherscan.io/api?module=contract&action=getabi&address={token}&apikey={ETHERSCAN_API_KEY}'
+            response = requests.get(url)
+            content = {'symbol': symbol, 'abi': response.json()['result']}
+            with open(f'./abi/{token}.json', 'w') as f:
+                json.dump(content, f)
+
+# Get Doth contract ERC20 Tokens balance list, only allowed token
+def getDothBalance():
+    tokens, guaranteed_amount = getTotalTokens()
+    save_token_abi()
+    res = []
+    for _, token in enumerate(tokens):
+        with open(f'./abi/{token}.json', 'r') as f:
+            token_dict = json.load(f)
+        abi = token_dict['abi']
+        symbol = token_dict['symbol']
+        contract = w3.eth.contract(address=token, abi=abi)
+        balance = contract.functions.balanceOf(DOTH_CONTRACT_ADDRESS).call() / 1e18
+        res.append(
+            {
+                'symbol': symbol,
+                'actual_amount': balance,
+                'guaranteed_amount': guaranteed_amount[_],
+            }
+        )
+    return res
+
+
 # if __name__ == '__main__':
 # test
+print(getDothBalance())
+
 # addAllowedToken('0x0000000000000000000000000000000000000000')
 # print(isTokenExisted('0x0000000000000000000000000000000000000000'))
 # removeAllowedToken('0x0000000000000000000000000000000000000000')

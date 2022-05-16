@@ -50,8 +50,8 @@ def send_mail(
     :param filename
     :return:
     """
-    # 正文
-    msg_root = MIMEMultipart()  # 创建一个带附件的实例
+    # content
+    msg_root = MIMEMultipart() 
     msg_root['SUBJECT'] = subject
     msg_root['From'] = sender
     msg_root['To'] = COMMASPACE.join(receivers)
