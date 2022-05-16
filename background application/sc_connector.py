@@ -263,7 +263,7 @@ def getDothBalance():
 
 # if __name__ == '__main__':
 # test
-print(getDothBalance())
+# print(getDothBalance())
 
 # addAllowedToken('0x0000000000000000000000000000000000000000')
 # print(isTokenExisted('0x0000000000000000000000000000000000000000'))
