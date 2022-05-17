@@ -1,6 +1,8 @@
+import 'package:doth/common/contract.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../data/system_info.dart';
@@ -14,15 +16,18 @@ class WalletScreen extends StatefulWidget {
 
 class _WalletScreenState extends State<WalletScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  String ltvValue = '';
 
   @override
   void initState() {
+    _refresh();
     super.initState();
-    _tabController = new TabController(length: 3, vsync: this);
+  }
 
-    _tabController.addListener(() {
-      print(_tabController.index);
+  void _refresh() async {
+    List<dynamic> res = await Contract().getLTV();
+    setState(() {
+      ltvValue = res.toString();
     });
   }
 
@@ -38,63 +43,40 @@ class _WalletScreenState extends State<WalletScreen>
         orientation: Orientation.portrait);
 
     return Scaffold(
-      backgroundColor: SystemInfo.shared().backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xffffffff),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        elevation: 1.w,
-        title: Text(
-          'Doth',
-          style: TextStyle(
-              color: SystemInfo.shared().themeColor,
-              fontWeight: FontWeight.bold),
-        ),
-        bottom: TabBar(
-          indicatorColor: SystemInfo.shared().themeColor,
-          labelColor: Colors.black,
-          indicatorPadding: EdgeInsets.only(left: 30.w, right: 30.w),
-          controller: _tabController, // 4 需要配置 controller！！！
-          // isScrollable: true,
-          tabs: const <Widget>[
-            Tab(text: 'Dashboard'),
-            Tab(text: 'Liability'),
-            Tab(text: 'Deposit'),
-          ],
-        ),
-      ),
-      //内容区域
-      body: TabBarView(
-        controller: _tabController, // 4 需要配置 controller！！！
-        children: <Widget>[
-          CustomScrollView(
-            slivers: <Widget>[
-              _buildAccumulatedBorrowedView(false),
-              _buildDepositbottomView(),
-            ],
+        backgroundColor: SystemInfo.shared().backgroundColor,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color(0xffffffff),
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          elevation: 1.w,
+          title: Text(
+            'Doth',
+            style: TextStyle(
+                color: SystemInfo.shared().themeColor,
+                fontWeight: FontWeight.bold),
           ),
-          CustomScrollView(
+        ),
+        //内容区域
+        body: EasyRefresh(
+          onRefresh: () async {
+            _refresh();
+          },
+          child: CustomScrollView(
             slivers: <Widget>[
-              _buildAccumulatedBorrowedView(true),
-            ],
-          ),
-          CustomScrollView(
-            slivers: <Widget>[
+              _buildLTVView(),
+              _buildAssetsView(),
               _buildDepositAssetsView(),
-              _buildDepositbottomView(),
             ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
-  SliverToBoxAdapter _buildAccumulatedBorrowedView(bool isWithButton) {
+  SliverToBoxAdapter _buildLTVView() {
     return SliverToBoxAdapter(
         child: Padding(
       padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
       child: Container(
-        height: 345.w,
+        height: 85.w,
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.all(Radius.circular(8.w)),
@@ -107,425 +89,116 @@ class _WalletScreenState extends State<WalletScreen>
                   spreadRadius: 0 //阴影扩散程度
                   )
             ]),
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 24.w, top: 18.w),
-              child: Text(
-                'Accumulated borroed',
+        child: Container(
+          padding: EdgeInsets.all(16.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                'My LTV',
                 style: TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
                   fontSize: 18.sp,
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 70.w, left: 20.w),
-              child: Container(
-                width: 35.w,
-                height: 35.w,
-                alignment: Alignment.centerRight,
-                child: Image.asset(
-                  'assets/icons/wallet_doller.png',
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 174.w, right: 24.w, top: 76.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    '31,132',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 23.sp,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.black87.withOpacity(0.3),
-                    size: 20.w,
-                  )
-                ],
-              ),
-            ),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Rate',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '3.5% p.a',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 152.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Borrowing time',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '10 days',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 182.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Interest Incurred',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '2336.5',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-              padding: EdgeInsets.only(left: 20.w, top: 260.w),
-              child: isWithButton
-                  ? Container(
-                      width: 320.w,
-                      height: 70.w,
-                      padding: EdgeInsets.only(top: 15.w, bottom: 0.w),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: 150.w,
-                            child: OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.w),
-                                ),
-                                backgroundColor:
-                                    SystemInfo.shared().subthemeColor,
-                                side: BorderSide(
-                                    width: 0.5.w,
-                                    color: SystemInfo.shared().subthemeColor),
-                              ),
-                              child: Text(
-                                "Repayment",
-                                style: TextStyle(
-                                    color: SystemInfo.shared().themeColor,
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 10.w,
-                          ),
-                          SizedBox(
-                            width: 150.w,
-                            child: OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.w),
-                                ),
-                                backgroundColor: SystemInfo.shared().themeColor,
-                                side: BorderSide(
-                                    width: 0.5.w,
-                                    color: SystemInfo.shared().themeColor),
-                              ),
-                              child: Text(
-                                "Borrow more",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0),
-                              ),
-                            ),
-                          )
-                        ],
-                      ))
-                  : null,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
-              child: Divider(
-                color: Colors.grey[400],
-                height: 0.w,
-                thickness: 0.5.w,
-                indent: 11.w,
-                endIndent: 11.w,
-              ),
-            )
-          ],
-        ),
-      ),
-    ));
-  }
-
-  SliverToBoxAdapter _buildDepositAssetsView() {
-    return SliverToBoxAdapter(
-        child: Padding(
-      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
-      child: Container(
-        height: 345.w,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(8.w)),
-            boxShadow: [
-              BoxShadow(
-                  color:
-                      const Color.fromRGBO(192, 192, 192, 0.5).withOpacity(0.2),
-                  offset: Offset(0, 2.2.w), //阴影xy轴偏移量
-                  blurRadius: 7.7.w, //阴影模糊程度
-                  spreadRadius: 0 //阴影扩散程度
-                  )
-            ]),
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 24.w, top: 18.w),
-              child: Text(
-                'My deposit assets',
+              Text(
+                ltvValue,
                 style: TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
                   fontSize: 18.sp,
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 70.w, left: 20.w),
-              child: Container(
-                width: 35.w,
-                height: 35.w,
-                alignment: Alignment.centerRight,
-                child: Image.asset(
-                  'assets/icons/borrow_btc.png',
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 174.w, right: 24.w, top: 76.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'BTC',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 23.sp,
-                    ),
-                  ),
-                  Text(
-                    '31,132',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 23.sp,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.black87.withOpacity(0.3),
-                    size: 20.w,
-                  )
-                ],
-              ),
-            ),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Rate',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '3.5% p.a',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 152.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Deposit time',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '10 days',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 182.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Accrued interest',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '2336.5',
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-              padding: EdgeInsets.only(left: 20.w, top: 260.w),
-              child: Container(
-                  width: 320.w,
-                  height: 70.w,
-                  padding: EdgeInsets.only(top: 15.w, bottom: 0.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        width: 150.w,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6.w),
-                            ),
-                            backgroundColor: SystemInfo.shared().subthemeColor,
-                            side: BorderSide(
-                                width: 0.5.w,
-                                color: SystemInfo.shared().subthemeColor),
-                          ),
-                          child: Text(
-                            "Withdraw",
-                            style: TextStyle(
-                                color: SystemInfo.shared().themeColor,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10.w,
-                      ),
-                      Container(
-                        width: 150.w,
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6.w),
-                            ),
-                            backgroundColor: SystemInfo.shared().themeColor,
-                            side: BorderSide(
-                                width: 0.5.w,
-                                color: SystemInfo.shared().themeColor),
-                          ),
-                          child: Text(
-                            "Make a deposit",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0),
-                          ),
-                        ),
-                      )
-                    ],
-                  )),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
-              child: Divider(
-                color: Colors.grey[400],
-                height: 0.w,
-                thickness: 0.5.w,
-                indent: 11.w,
-                endIndent: 11.w,
-              ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     ));
   }
 
-  SliverToBoxAdapter _buildDepositbottomView() {
+  SliverToBoxAdapter _buildAssetsView() {
+    List<Widget> render = [];
+    render.add(Text(
+      'My deposit assets',
+      style: TextStyle(
+        color: Colors.black87,
+        fontWeight: FontWeight.bold,
+        fontSize: 18.sp,
+      ),
+    ));
+
+    render.add(SizedBox(
+      height: 10.w,
+    ));
+
+    for (var item in SystemInfo.shared().nameList) {
+      render.add(Container(
+        padding: EdgeInsets.only(top: 5.w),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              item,
+              style: TextStyle(
+                color: Colors.black87.withOpacity(0.6),
+                fontWeight: FontWeight.bold,
+                fontSize: 18.sp,
+              ),
+            ),
+            Row(
+              children: <Widget>[
+                Text(
+                  '数量',
+                  style: TextStyle(
+                    color: Colors.black87.withOpacity(0.9),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  '价值',
+                  style: TextStyle(
+                    color: Colors.black87.withOpacity(0.9),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Container(
+                  width: 80.w,
+                  height: 24.w,
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.w),
+                      ),
+                      backgroundColor: SystemInfo.shared().themeColor,
+                      side: BorderSide(
+                          width: 0.5.w, color: SystemInfo.shared().themeColor),
+                    ),
+                    child: Text(
+                      "withdraw",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0),
+                    ),
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
+      ));
+    }
     return SliverToBoxAdapter(
         child: Padding(
       padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
       child: Container(
-          height: 65.w,
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(8.w)),
@@ -538,30 +211,117 @@ class _WalletScreenState extends State<WalletScreen>
                     spreadRadius: 0 //阴影扩散程度
                     )
               ]),
-          child: Padding(
-              padding: EdgeInsets.only(left: 20.w, right: 30.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Container(
-                    width: 35.w,
-                    height: 35.w,
-                    alignment: Alignment.centerRight,
-                    child: Image.asset(
-                      'assets/icons/wallet_eth.png',
-                      fit: BoxFit.fill,
-                    ),
+          child: Container(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, children: render),
+          )),
+    ));
+  }
+
+  SliverToBoxAdapter _buildDepositAssetsView() {
+    return SliverToBoxAdapter(
+        child: Padding(
+      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(8.w)),
+            boxShadow: [
+              BoxShadow(
+                  color:
+                      const Color.fromRGBO(192, 192, 192, 0.5).withOpacity(0.2),
+                  offset: Offset(0, 2.2.w), //阴影xy轴偏移量
+                  blurRadius: 7.7.w, //阴影模糊程度
+                  spreadRadius: 0 //阴影扩散程度
+                  )
+            ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'My Loan',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 18.sp,
+              ),
+            ),
+            SizedBox(height: 20.w),
+            Container(
+              width: double.infinity,
+              child: Center(
+                child: Text(
+                  '¥2000',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
                   ),
-                  Text(
-                    'ETH 51,132',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 23.sp,
+                ),
+              ),
+            ),
+            SizedBox(height: 10.w),
+            Container(
+                width: 320.w,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      width: 150.w,
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.w),
+                          ),
+                          backgroundColor: SystemInfo.shared().subthemeColor,
+                          side: BorderSide(
+                              width: 0.5.w,
+                              color: SystemInfo.shared().subthemeColor),
+                        ),
+                        child: Text(
+                          "Withdraw",
+                          style: TextStyle(
+                              color: SystemInfo.shared().themeColor,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ))),
+                    SizedBox(
+                      width: 10.w,
+                    ),
+                    Container(
+                      width: 150.w,
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.w),
+                          ),
+                          backgroundColor: SystemInfo.shared().themeColor,
+                          side: BorderSide(
+                              width: 0.5.w,
+                              color: SystemInfo.shared().themeColor),
+                        ),
+                        child: Text(
+                          "Make a deposit",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0),
+                        ),
+                      ),
+                    )
+                  ],
+                )),
+          ],
+        ),
+      ),
     ));
   }
 }

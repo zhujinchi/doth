@@ -1,5 +1,7 @@
 import 'package:doth/common/color_hex.dart';
 import 'package:doth/home_page.dart';
+import 'package:doth/pages/login/connect_page.dart';
+import 'package:doth/pages/login/prepared_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     passwordVisible = false;
+    _passWordEditingController.text = '111111';
+    _accountEditingController.text = '111111111111';
   }
 
   @override
@@ -335,8 +339,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   gotoHomePage(BuildContext context) {
+    // Navigator.of(context).pushAndRemoveUntil(
+    //     CupertinoPageRoute(builder: (context) => const HomePage()),
+    //     (route) => route == null);
+
     Navigator.of(context).pushAndRemoveUntil(
-        CupertinoPageRoute(builder: (context) => const HomePage()),
+        CupertinoPageRoute(builder: (context) => const ConnectPage()),
         (route) => route == null);
   }
 }

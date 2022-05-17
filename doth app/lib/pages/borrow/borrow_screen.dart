@@ -1,10 +1,17 @@
+import 'package:doth/common/Contract.dart';
 import 'package:doth/data/system_info.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:web3dart/crypto.dart';
+import 'package:web3dart/web3dart.dart';
+import 'package:http/http.dart';
 
 import '../../common/color_hex.dart';
+
+import 'dart:math';
+import 'dart:typed_data';
 
 class BorrowScreen extends StatefulWidget {
   const BorrowScreen({Key? key}) : super(key: key);
@@ -21,6 +28,8 @@ class _BorrowScreenState extends State<BorrowScreen> {
   void initState() {
     super.initState();
   }
+
+  void _refresh() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -48,20 +57,22 @@ class _BorrowScreenState extends State<BorrowScreen> {
         ),
         //内容区域
         body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () {
-            FocusScopeNode currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus &&
-                currentFocus.focusedChild != null) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            }
+            FocusScope.of(context).requestFocus(FocusNode());
           },
-          child: CustomScrollView(
-            slivers: <Widget>[
-              _buildBorrowView(),
-              _buildMortgageView(),
-              _buildCollectionView(),
-              _buildConfirmButton()
-            ],
+          child: EasyRefresh(
+            onRefresh: () async {
+              _refresh();
+            },
+            child: CustomScrollView(
+              slivers: <Widget>[
+                _buildBorrowView(),
+                //_buildMortgageView(),
+                _buildCollectionView(),
+                _buildConfirmButton()
+              ],
+            ),
           ),
         ));
   }
@@ -314,7 +325,7 @@ class _BorrowScreenState extends State<BorrowScreen> {
                 height: 35.w,
                 alignment: Alignment.centerRight,
                 child: Image.asset(
-                  'assets/icons/borrow_mastercard.png',
+                  'assets/icons/borrow_paypal.png',
                   fit: BoxFit.fill,
                 ),
               ),
@@ -327,7 +338,7 @@ class _BorrowScreenState extends State<BorrowScreen> {
                   Row(
                     children: <Widget>[
                       Text(
-                        'Mastercard',
+                        'Paypal',
                         style: TextStyle(
                           color: Colors.black87,
                           fontWeight: FontWeight.bold,
@@ -344,29 +355,29 @@ class _BorrowScreenState extends State<BorrowScreen> {
                 ],
               ),
             ),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Available:',
-                      style: TextStyle(
-                        color: Colors.black87.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '10000000.0000',
-                      style: TextStyle(
-                        color: Colors.black87.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
+            // Padding(
+            //     padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //       children: <Widget>[
+            //         Text(
+            //           'Available:',
+            //           style: TextStyle(
+            //             color: Colors.black87.withOpacity(0.6),
+            //             fontWeight: FontWeight.bold,
+            //             fontSize: 16.sp,
+            //           ),
+            //         ),
+            //         Text(
+            //           '10000000.0000',
+            //           style: TextStyle(
+            //             color: Colors.black87.withOpacity(0.6),
+            //             fontWeight: FontWeight.bold,
+            //             fontSize: 16.sp,
+            //           ),
+            //         ),
+            //       ],
+            //     )),
             Padding(
               padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
               child: Divider(
@@ -393,17 +404,27 @@ class _BorrowScreenState extends State<BorrowScreen> {
         padding:
             EdgeInsets.only(left: 15.w, right: 15.w, top: 15.w, bottom: 0.w),
         child: OutlinedButton(
-          onPressed: () {},
+          onPressed: _amountBorrowedEditingController.text.isNotEmpty
+              ? () {
+                  Contract()
+                      .borrow(int.parse(_amountBorrowedEditingController.text));
+                }
+              : null,
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.w),
             ),
-            backgroundColor: SystemInfo.shared().themeColor,
-            side:
-                BorderSide(width: 0.5.w, color: SystemInfo.shared().themeColor),
+            backgroundColor: _amountBorrowedEditingController.text.isNotEmpty
+                ? SystemInfo.shared().themeColor
+                : Colors.grey.withOpacity(0.3),
+            side: BorderSide(
+                width: 0.5.w,
+                color: _amountBorrowedEditingController.text.isNotEmpty
+                    ? SystemInfo.shared().themeColor
+                    : Colors.grey.withOpacity(0.3)),
           ),
           child: Text(
-            "Confirm the deposit",
+            "Confirm the borrow",
             style: TextStyle(
                 color: Colors.white,
                 fontSize: 14.sp,

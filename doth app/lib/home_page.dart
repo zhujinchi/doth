@@ -24,6 +24,8 @@ class _HomePageState extends State<HomePage> {
   //Color backgroundColor = const Color(0xff050B18);
   Color backgroundColor = const Color(0xffffffff);
 
+  List<Widget> pages = [];
+
   List<String> titles = ['Borrow', 'Deposit', 'Wallet', 'Profile'];
   List<String> bodyImages = [
     'assets/images/body_home.png',
@@ -36,6 +38,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    pages
+      ..add(const BorrowScreen())
+      ..add(const DepositScreen())
+      ..add(const WalletScreen())
+      ..add(const ProfileScreen());
     _init();
   }
 
@@ -48,7 +56,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: backgroundColor,
-        body: _tabPages[_currentIndex],
+        body: IndexedStack(
+          index: _currentIndex,
+          children: pages,
+        ),
         bottomNavigationBar: _buildBottomBar());
   }
 

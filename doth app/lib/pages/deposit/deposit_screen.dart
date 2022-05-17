@@ -1,7 +1,11 @@
+import 'package:doth/common/contract.dart';
+import 'package:doth/common/my_fluttertoast.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:web3dart/web3dart.dart';
 
 import '../../common/color_hex.dart';
 import '../../data/system_info.dart';
@@ -17,9 +21,24 @@ class _DepositScreenState extends State<DepositScreen> {
   final TextEditingController _amountDepositedEditingController =
       TextEditingController();
 
+  List<String> _animals = ["Dog", "Cat", "Crocodile", "Dragon"];
+
+  String? _selectedColor = 'wai';
+
+  String _available = SystemInfo.shared().amountList[1].toString();
+
   @override
   void initState() {
+    _refresh();
     super.initState();
+  }
+
+  void _refresh() async {
+    Contract().getTotalTokens();
+    // for (String items in SystemInfo.shared().tokenList) {
+    //   Contract().getABIwithToken(items);
+    // }
+    //tokennameList = SystemInfo.shared().nameList;
   }
 
   @override
@@ -33,29 +52,39 @@ class _DepositScreenState extends State<DepositScreen> {
         minTextAdapt: true,
         orientation: Orientation.portrait);
     return Scaffold(
-      backgroundColor: SystemInfo.shared().backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xffffffff),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        elevation: 1.w,
-        title: Text(
-          'Doth',
-          style: TextStyle(
-              color: SystemInfo.shared().themeColor,
-              fontWeight: FontWeight.bold),
+        backgroundColor: SystemInfo.shared().backgroundColor,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color(0xffffffff),
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          elevation: 1.w,
+          title: Text(
+            'Doth',
+            style: TextStyle(
+                color: SystemInfo.shared().themeColor,
+                fontWeight: FontWeight.bold),
+          ),
         ),
-      ),
-      //内容区域
-      body: CustomScrollView(
-        slivers: <Widget>[
-          _buildPaywithView(),
-          _buildDepositView(),
-          _buildConfirmButton(),
-          _buildNotificationText(),
-        ],
-      ),
-    );
+        //内容区域
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: EasyRefresh(
+            onRefresh: () async {
+              _refresh();
+            },
+            child: CustomScrollView(
+              slivers: <Widget>[
+                _buildPaywithView(),
+                _buildDepositView(),
+                _buildConfirmButton(),
+                _buildNotificationText(),
+              ],
+            ),
+          ),
+        ));
   }
 
   SliverToBoxAdapter _buildPaywithView() {
@@ -102,23 +131,60 @@ class _DepositScreenState extends State<DepositScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(left: 64.w, right: 24.w, top: 76.w),
+              padding: EdgeInsets.only(left: 64.w, right: 24.w, top: 46.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(
-                    'BTC',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 23.sp,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.black87.withOpacity(0.3),
-                    size: 20.w,
-                  )
+                  Container(
+                      width: 260.w,
+                      height: 50.w,
+                      color: Colors.white,
+                      margin: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            value: _selectedColor,
+                            items:
+                                SystemInfo.shared().nameList.map((String kind) {
+                              return DropdownMenuItem(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      kind,
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 23.sp,
+                                      ),
+                                    ),
+                                    // Text(
+                                    //   " to be set",
+                                    //   style: TextStyle(
+                                    //     color: Colors.black87,
+                                    //     fontWeight: FontWeight.bold,
+                                    //     fontSize: 23.sp,
+                                    //   ),
+                                    // ),
+                                  ],
+                                ),
+                                value: kind,
+                              );
+                            }).toList(),
+                            onChanged: (String? value) {
+                              _selectedColor = value.toString();
+                              int i = SystemInfo.shared()
+                                  .nameList
+                                  .indexOf(value.toString());
+
+                              _available =
+                                  SystemInfo.shared().amountList[i].toString();
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      )),
                 ],
               ),
             ),
@@ -126,6 +192,7 @@ class _DepositScreenState extends State<DepositScreen> {
                 padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     Text(
                       'Available:',
@@ -136,11 +203,11 @@ class _DepositScreenState extends State<DepositScreen> {
                       ),
                     ),
                     Text(
-                      '10000000.0000',
+                      _available,
                       style: TextStyle(
                         color: Colors.black87.withOpacity(0.6),
                         fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],

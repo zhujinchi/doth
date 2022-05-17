@@ -45,6 +45,22 @@ dependencies:
   # 屏幕适配
   flutter_screenutil: ^5.3.1
 
+  # we3
+  web3dart: 2.3.5
+
+  #dio
+  dio: ^4.0.6
+
+  #share_preference
+  shared_preferences: ^2.0.15
+
+  # 刷新
+  flutter_easyrefresh: ^2.2.1
+
+  # 吐司弹窗
+  fluttertoast:
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -71,6 +87,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/json/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
