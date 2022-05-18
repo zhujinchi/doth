@@ -227,7 +227,7 @@ def getTokenSymbol(token):
     contract = w3.eth.contract(address=token, abi=abi)
     return contract.functions.symbol().call()
 
-# Check, format and save token info, {symbol, abi}
+# Check, format and save token {symbol, abi} to local
 def save_token_abi():
     tokens, _ = getTotalTokens()
     for token in tokens:

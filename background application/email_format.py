@@ -7,6 +7,7 @@
 
 from sc_connector import getMargincallLTV, getLiquidationLTV, getInitialLTV
 
+# Email format for margincall
 marginCallLTV = getMargincallLTV() * 100
 format_margincall = f"""<div class="content" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
                     <table class="main" width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;" bgcolor="#fff">
@@ -54,6 +55,8 @@ format_margincall = f"""<div class="content" style="font-family: 'Helvetica Neue
                     </div>
                 </div>
                 """
+
+# Email format for liquidation
 liquidationLTV = getLiquidationLTV() * 100
 initialLTV = getInitialLTV() * 100
 format_liquidation = f"""<div class="content" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
