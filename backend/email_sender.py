@@ -20,7 +20,7 @@ config = ConfigParser()
 config.read('doth.config')
 
 SMTP_SERVER = config['SMTP']['SMTP_SERVER']
-SMTP_PORT = config['SMTP']['SMTP_PORT']
+SMTP_PORT = int(config['SMTP']['SMTP_PORT'])
 # Test email account
 ACCOUNT_INFO = {'username': 'doth.notice@gmail.com', 'password': 'doth123456'}
 SENDER = 'Doth <doth.notice@gmail.com>'

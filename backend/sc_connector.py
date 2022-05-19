@@ -19,7 +19,7 @@ config.read('doth.config')
 MY_ADDRESS = config['Ethereum']['MY_ADDRESS']
 PRIVATE_KEY = config['Ethereum']['PRIVATE_KEY']
 INFURA_URL = config['Ethereum']['INFURA_URL']
-CHAIN_ID = config['Ethereum']['CHAIN_ID']
+CHAIN_ID = int(config['Ethereum']['CHAIN_ID'])
 DOTH_CONTRACT_ADDRESS = config['Ethereum']['DOTH_CONTRACT_ADDRESS']
 ETHERSCAN_API_KEY = config['Ethereum']['ETHERSCAN_API_KEY']
 
