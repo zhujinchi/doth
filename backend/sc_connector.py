@@ -25,10 +25,11 @@ ETHERSCAN_API_KEY = config['Ethereum']['ETHERSCAN_API_KEY']
 
 
 # Load abi
-with open('abi/doth_abi.json', 'r') as f:
-    ABI = json.load(f)
+with open('abi/doth_abi.json', 'r') as f1, open('abi/ERC20_abi.json', 'r') as f2:
+    Doth_ABI = json.load(f1)
+    ERC20_ABI = json.load(f2)
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
-doth = w3.eth.contract(address=DOTH_CONTRACT_ADDRESS, abi=ABI)
+doth = w3.eth.contract(address=DOTH_CONTRACT_ADDRESS, abi=Doth_ABI)
 
 
 def get_latest_txn():
@@ -249,23 +250,8 @@ def getTokenSymbol(token):
     Returns:
         str: token symbol
     """
-    url = f'https://api-kovan.etherscan.io/api?module=contract&action=getabi&address={token}&apikey={ETHERSCAN_API_KEY}'
-    abi = requests.get(url).json()['result']
-    contract = w3.eth.contract(address=token, abi=abi)
+    contract = w3.eth.contract(address=token, abi=ERC20_ABI)
     return contract.functions.symbol().call()
-
-
-def save_token_abi():
-    """Check, format and save token {symbol, abi} to local"""
-    tokens, _ = getTotalTokens()
-    for token in tokens:
-        if not os.path.exists(f'./abi/{token}.json'):
-            symbol = getTokenSymbol(token)
-            url = f'https://api-kovan.etherscan.io/api?module=contract&action=getabi&address={token}&apikey={ETHERSCAN_API_KEY}'
-            response = requests.get(url)
-            content = {'symbol': symbol, 'abi': response.json()['result']}
-            with open(f'./abi/{token}.json', 'w') as f:
-                json.dump(content, f)
 
 
 def getDothBalance():
@@ -275,14 +261,10 @@ def getDothBalance():
         list: list of token info dict, including symbol, actual amount, guranteed amount
     """
     tokens, guaranteed_amount = getTotalTokens()
-    save_token_abi()
     res = []
     for _, token in enumerate(tokens):
-        with open(f'./abi/{token}.json', 'r') as f:
-            token_dict = json.load(f)
-        abi = token_dict['abi']
-        symbol = token_dict['symbol']
-        contract = w3.eth.contract(address=token, abi=abi)
+        symbol = getTokenSymbol(token)
+        contract = w3.eth.contract(address=token, abi=ERC20_ABI)
         balance = contract.functions.balanceOf(DOTH_CONTRACT_ADDRESS).call() / 1e18
         res.append(
             {
