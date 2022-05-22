@@ -24,47 +24,6 @@ INFURA_URL = config['Ethereum']['INFURA_URL']
 w3 = Web3(Web3.HTTPProvider(INFURA_URL))
 
 
-# def handle_event(event):
-#     print(event)
-#     data = event['data']
-#     print(data)
-#     user_address = data[:66]
-#     email_format = int(data[67:], 16)
-#     print(f'user_address: {user_address}, email_format: {email_format}')
-#     if email_format == 1:
-#         send_mail(['464735955@qq.com'], "Margin Call", format_margincall)
-#     elif email_format == 2:
-#         send_mail(['464735955@qq.com'], "Liquidation Call", format_liquidation)
-
-
-# async def log_loop(event_filter, poll_interval):
-#     while True:
-#         for event in event_filter.get_new_entries():
-#             handle_event(event)
-#         await asyncio.sleep(poll_interval)
-
-
-# def main():
-#     block_filter = w3.eth.filter(
-#         {
-#             'fromBlock': 1,
-#             'toBlock': 'latest',
-#             'address': DOTH_CONTRACT_ADDRESS,
-#             'topics': [Web3.keccak(text='EmailCall(address,uint256)').hex()],
-#             # 'topics': [Web3.keccak(text='SetPriceFeedContract(address,address)').hex()],
-#         }
-#     )
-#     loop = asyncio.get_event_loop()
-#     try:
-#         loop.run_until_complete(asyncio.gather(log_loop(block_filter, 2)))
-#     finally:
-#         loop.close()
-
-
-# if __name__ == '__main__':
-#     main()
-
-
 def handle_event(event):
     print(event)
     data = event['data']
@@ -99,8 +58,6 @@ def event_listener_start():
     worker = Thread(target=log_loop, args=(event_filter, 5), daemon=True)
     worker.start()
     #     # .. do some other stuff
-    # while True:
-    #     time.sleep(1)
 
 
 # if __name__ == '__main__':
