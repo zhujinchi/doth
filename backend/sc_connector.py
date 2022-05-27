@@ -276,6 +276,28 @@ def getDothBalance():
     return res
 
 
+def get_user_txn_hash_list(user_addr, contract_addr=DOTH_CONTRACT_ADDRESS):
+    """Get user transaction hash list
+
+    Args:
+        user_addr (str): user address
+        contract_addr (str, optional): contract address. Defaults to DOTH_CONTRACT_ADDRESS.
+
+    Returns:
+        list: transaction hash list
+    """
+    event_filter = w3.eth.filter(
+        {
+            "address": contract_addr,
+            "fromBlock": 0,
+            "toBlock": "latest",
+            "from": user_addr,
+        }
+    )
+    entries = event_filter.get_all_entries()
+    return [i['transactionHash'].hex() for i in entries][::-1]
+
+
 # if __name__ == '__main__':
 # test
 # print(getDothBalance())
