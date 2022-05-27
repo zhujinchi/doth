@@ -127,7 +127,7 @@ def setAPR(apr):
 
 
 def setInitialLTV(ltv):
-    # FIXME: 合约这个方法名 英文拼写错了。。。
+    # FIXME: The method name of the contract is misspelled in English
     transaction = doth.functions.setIntialLTV(ltv).buildTransaction(get_latest_txn())
     return sign_send_transaction(transaction)
 
