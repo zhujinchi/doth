@@ -1,17 +1,12 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:doth/common/Contract.dart';
 import 'package:doth/data/system_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:web3dart/crypto.dart';
-import 'package:web3dart/web3dart.dart';
-import 'package:http/http.dart';
 
 import '../../common/color_hex.dart';
-
-import 'dart:math';
-import 'dart:typed_data';
 
 class BorrowScreen extends StatefulWidget {
   const BorrowScreen({Key? key}) : super(key: key);
@@ -24,12 +19,23 @@ class _BorrowScreenState extends State<BorrowScreen> {
   final TextEditingController _amountBorrowedEditingController =
       TextEditingController();
 
+  String _pavalue = '';
+
   @override
   void initState() {
+    _refresh();
     super.initState();
   }
 
-  void _refresh() async {}
+  void _refresh() async {
+    var res = await Contract().apr();
+    BigInt temp = res[0];
+
+    setState(() {
+      //_pavalue = res[0] / BigInt.from(pow(10, 6)).toRadixString(2);
+      _pavalue = (temp.toInt() / 1000000).toString();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,24 +104,49 @@ class _BorrowScreenState extends State<BorrowScreen> {
         child: Stack(children: <Widget>[
           Padding(
             padding: EdgeInsets.only(left: 24.w, top: 18.w),
-            child: Text(
-              'I need to borrow',
-              style: TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-                fontSize: 23.sp,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  'I need to borrow',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 23.sp,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  '',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 23.sp,
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
             padding: EdgeInsets.only(left: 20.w, top: 122.w),
-            child: Text(
-              'Expected to arrive within 2 hours',
-              style: TextStyle(
-                color: Colors.black87.withOpacity(0.6),
-                fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  _pavalue,
+                  style: TextStyle(
+                    color: Colors.red.withOpacity(0.9),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                Text(
+                  '% p.a. Expected to arrive within 2hours',
+                  style: TextStyle(
+                    color: Colors.black87.withOpacity(0.9),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
@@ -124,7 +155,8 @@ class _BorrowScreenState extends State<BorrowScreen> {
                 width: 260.w,
                 height: 40.w,
                 child: TextField(
-                  keyboardType: TextInputType.number,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   cursorColor: HexColor.fromHex('5C8987'),
                   cursorHeight: 18.w,
                   cursorRadius: Radius.circular(2.w),
@@ -180,109 +212,6 @@ class _BorrowScreenState extends State<BorrowScreen> {
             ),
           )
         ]),
-      ),
-    ));
-  }
-
-  SliverToBoxAdapter _buildMortgageView() {
-    return SliverToBoxAdapter(
-        child: Padding(
-      padding: EdgeInsets.only(top: 15.w, left: 15.w, right: 15.w),
-      child: Container(
-        height: 155.w,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(8.w)),
-            boxShadow: [
-              BoxShadow(
-                  color:
-                      const Color.fromRGBO(192, 192, 192, 0.5).withOpacity(0.2),
-                  offset: Offset(0, 2.2.w), //阴影xy轴偏移量
-                  blurRadius: 7.7.w, //阴影模糊程度
-                  spreadRadius: 0 //阴影扩散程度
-                  )
-            ]),
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 24.w, top: 18.w),
-              child: Text(
-                'Mortgage method',
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 23.sp,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 70.w, left: 20.w),
-              child: Container(
-                width: 35.w,
-                height: 35.w,
-                alignment: Alignment.centerRight,
-                child: Image.asset(
-                  'assets/icons/borrow_btc.png',
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 64.w, right: 24.w, top: 76.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'BTC',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 23.sp,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.black87.withOpacity(0.3),
-                    size: 20.w,
-                  )
-                ],
-              ),
-            ),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Available:',
-                      style: TextStyle(
-                        color: Colors.black87.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      '10000000.0000',
-                      style: TextStyle(
-                        color: Colors.black87.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-              padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
-              child: Divider(
-                color: Colors.grey[400],
-                height: 0.w,
-                thickness: 0.5.w,
-                indent: 11.w,
-                endIndent: 11.w,
-              ),
-            )
-          ],
-        ),
       ),
     ));
   }
@@ -348,7 +277,7 @@ class _BorrowScreenState extends State<BorrowScreen> {
                     ],
                   ),
                   Icon(
-                    Icons.arrow_forward_ios_rounded,
+                    Icons.access_time_filled_sharp,
                     color: Colors.black87.withOpacity(0.3),
                     size: 20.w,
                   )
@@ -405,9 +334,11 @@ class _BorrowScreenState extends State<BorrowScreen> {
             EdgeInsets.only(left: 15.w, right: 15.w, top: 15.w, bottom: 0.w),
         child: OutlinedButton(
           onPressed: _amountBorrowedEditingController.text.isNotEmpty
-              ? () {
-                  Contract()
-                      .borrow(int.parse(_amountBorrowedEditingController.text));
+              ? () async {
+                  await Contract().borrow(
+                      double.parse(_amountBorrowedEditingController.text));
+                  showOkAlertDialog(context: context, title: 'Borrow success');
+                  _amountBorrowedEditingController.clear();
                 }
               : null,
           style: OutlinedButton.styleFrom(

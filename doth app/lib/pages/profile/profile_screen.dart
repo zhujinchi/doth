@@ -1,3 +1,4 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:doth/pages/login/loghome_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../common/color_hex.dart';
 import '../../data/system_info.dart';
@@ -112,7 +114,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         SizedBox(height: 6.w),
                         Text(
-                          'Zhimei Chen',
+                          SystemInfo.shared().lastname +
+                              ' ' +
+                              SystemInfo.shared().firstname,
                           style: TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
@@ -151,14 +155,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.only(top: 7.w),
               child: Column(
                 children: <Widget>[
-                  buildCellWith(
-                      'assets/icons/profile_list_phone.png', '+86 18668135973'),
+                  buildCellWith('assets/icons/profile_list_phone.png',
+                      SystemInfo.shared().telephone),
                   buildLine(),
                   buildCellWith('assets/icons/profile_list_email.png',
-                      'zche3338@uni.sydney.edu.au'),
+                      SystemInfo.shared().email),
                   buildLine(),
-                  buildCellWith(
-                      'assets/icons/profile_list_card.png', '****4402'),
+                  buildCellWith('assets/icons/profile_list_card.png',
+                      'doth_test_business@test.pub'),
                 ],
               ),
             )),
@@ -189,12 +193,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: <Widget>[
                 buildCellWith('assets/icons/profile_list_info.png',
-                    'Account Information'),
+                    SystemInfo.shared().public_key.substring(0, 16) + '****'),
                 buildLine(),
                 buildCellWith('assets/icons/profile_list_service.png',
                     'Customer service'),
                 buildLine(),
-                buildCellWith('assets/icons/profile_list_other.png', 'Others'),
+                InkWell(
+                    onTap: () {
+                      showOkCancelAlertDialog(
+                              context: context,
+                              title: "Do you want to log out?")
+                          .then((value) {
+                        if (value == OkCancelResult.ok) {
+                          logout();
+                        }
+                      });
+                    },
+                    child: buildCellWith(
+                        'assets/icons/profile_list_other.png', 'Log Out')),
               ],
             ),
           )),
@@ -243,6 +259,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         endIndent: 11.w,
       ),
     );
+  }
+
+  ///登出
+  Future<void> logout() async {
+    // Obtain shared preferences.
+    final prefs = await SharedPreferences.getInstance();
+
+    final removepk = await prefs.remove('privatekey');
+    final removeac = await prefs.remove('account');
+    final removepw = await prefs.remove('password');
+
+    gotoLoghomePage(context);
   }
 
   gotoLoghomePage(BuildContext context) {

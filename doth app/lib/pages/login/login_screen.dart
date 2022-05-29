@@ -1,3 +1,5 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:doth/common/api.dart';
 import 'package:doth/common/color_hex.dart';
 import 'package:doth/home_page.dart';
 import 'package:doth/pages/login/connect_page.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/system_info.dart';
 
@@ -27,10 +30,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
+    getlocallog();
     super.initState();
     passwordVisible = false;
-    _passWordEditingController.text = '111111';
-    _accountEditingController.text = '111111111111';
+  }
+
+  getlocallog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? account = prefs.getString('account');
+    final String? password = prefs.getString('password');
+    if (account != null && account.isNotEmpty) {
+      _accountEditingController.text = account;
+    }
+    if (password != null && password.isNotEmpty) {
+      _passWordEditingController.text = password;
+    }
+    setState(() {});
   }
 
   @override
@@ -44,42 +59,49 @@ class _LoginScreenState extends State<LoginScreen> {
         minTextAdapt: true,
         orientation: Orientation.portrait);
     return Scaffold(
-      backgroundColor: SystemInfo.shared().loginbackgroundColor,
-      //内容区域
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
         backgroundColor: SystemInfo.shared().loginbackgroundColor,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        elevation: 0,
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: const Icon(
-                Icons.arrow_back,
-                color: Color.fromARGB(255, 30, 16, 99),
-              ),
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-            );
-          },
+        //内容区域
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: SystemInfo.shared().loginbackgroundColor,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          elevation: 0,
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Color.fromARGB(255, 30, 16, 99),
+                ),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
+            },
+          ),
         ),
-      ),
-
-      body: CustomScrollView(
-        //physics: const NeverScrollableScrollPhysics(),
-        slivers: <Widget>[
-          _buildWelcomeText(),
-          _buildAccountInputView(),
-          _buildPasswordInputView(),
-          _buildConfirmView(),
-          _buildLoginView()
-        ],
-      ),
-    );
+        body: GestureDetector(
+          onTap: () {
+            FocusScopeNode currentFocus = FocusScope.of(context);
+            if (!currentFocus.hasPrimaryFocus &&
+                currentFocus.focusedChild != null) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: CustomScrollView(
+            //physics: const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[
+              _buildWelcomeText(),
+              _buildAccountInputView(),
+              _buildPasswordInputView(),
+              _buildConfirmView(),
+              _buildLoginView()
+            ],
+          ),
+        ));
   }
 
   SliverToBoxAdapter _buildWelcomeText() {
@@ -134,14 +156,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _accountEditingController,
                           showCursor: true,
                           maxLines: 1,
-                          maxLength: 12,
+                          maxLength: 30,
                           autofocus: false,
                           style: TextStyle(fontSize: 16.sp),
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             isCollapsed: false,
                             counterText: '',
-                            hintText: 'Email or phone number',
+                            hintText: 'Email',
                             hintStyle: TextStyle(
                                 color: Colors.grey.withOpacity(0.5),
                                 fontSize: 16.sp,
@@ -228,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _passWordEditingController,
                           showCursor: true,
                           maxLines: 1,
-                          maxLength: 12,
+                          maxLength: 16,
                           autofocus: false,
                           obscureText: !passwordVisible,
                           style: TextStyle(fontSize: 18.w),
@@ -305,8 +327,30 @@ class _LoginScreenState extends State<LoginScreen> {
         child: OutlinedButton(
           onPressed: _accountEditingController.text.length >= 11 &&
                   _passWordEditingController.text.length >= 6
-              ? () {
-                  gotoHomePage(context);
+              ? () async {
+                  //gotoHomePage(context);
+                  var res = await API().login(_accountEditingController.text,
+                      _passWordEditingController.text);
+
+                  print(res);
+                  if (res['code'] == 0) {
+                    showOkAlertDialog(context: context, title: 'Login Success')
+                        .then((value) async {
+                      //登录成功，保存email和密码
+                      await loginStep(res['data']);
+                      gotoConnectPage(context);
+                    });
+                  } else if (res['code'] == -1) {
+                    showOkAlertDialog(
+                        context: context,
+                        title: 'Login Failed',
+                        message: res['msg']);
+                  } else {
+                    showOkAlertDialog(
+                        context: context,
+                        title: 'Login Failed',
+                        message: 'Check you network');
+                  }
                 }
               : null,
           style: OutlinedButton.styleFrom(
@@ -338,11 +382,23 @@ class _LoginScreenState extends State<LoginScreen> {
     ));
   }
 
-  gotoHomePage(BuildContext context) {
-    // Navigator.of(context).pushAndRemoveUntil(
-    //     CupertinoPageRoute(builder: (context) => const HomePage()),
-    //     (route) => route == null);
+  loginStep(dynamic input) async {
+    print(input['token']);
+    SystemInfo.shared().token = input['token'];
+    SystemInfo.shared().email = input['user']['email'];
+    SystemInfo.shared().firstname = input['user']['firstname'];
+    SystemInfo.shared().lastname = input['user']['lastname'];
+    SystemInfo.shared().telephone = input['user']['telephone'];
+    SystemInfo.shared().public_key = input['user']['public_key'];
 
+    //share preference
+    // Obtain shared preferences.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('account', _accountEditingController.text);
+    await prefs.setString('password', _passWordEditingController.text);
+  }
+
+  gotoConnectPage(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
         CupertinoPageRoute(builder: (context) => const ConnectPage()),
         (route) => route == null);

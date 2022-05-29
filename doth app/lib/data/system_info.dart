@@ -22,12 +22,13 @@ class SystemInfo {
   Color loginbackgroundColor = HexColor.fromHex('f4f4f6');
 
   static String jsonData = '';
+  static String erc20jsonData = '';
   static String jsonDataDefault = '';
 
   ///
-  String privateKey =
-      '8654a13f94293c061c991439ea7612664287ec0a4ba62a563e0a15948bfabbe5';
+
   String rpcUrl = 'https://kovan.infura.io/v3/e3b3cf0628f04f2c9e54ccd14355ff57';
+
   var doth_address =
       EthereumAddress.fromHex("0x80596450a684A8c43e57c1B246C690Cb85EA2138");
 
@@ -36,5 +37,19 @@ class SystemInfo {
 
   List tokenList = [];
   List amountList = [];
-  List<String> nameList = ['WETH', 'DAI'];
+  List<String> nameList = [];
+  //List<String> abiList = [];
+  List assetsAmount = [];
+  List assetsList = [];
+
+  //login information
+
+  String token = '';
+  //user
+  String email = '';
+  String firstname = '';
+  String lastname = '';
+  String telephone = '';
+  String public_key = '';
+  String privateKey = '';
 }

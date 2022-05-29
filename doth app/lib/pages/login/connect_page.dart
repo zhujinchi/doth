@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:doth/common/Contract.dart';
+import 'package:doth/common/my_fluttertoast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
 
@@ -29,16 +31,28 @@ class _ConnectPageState extends State<ConnectPage> {
   String hash = '';
 
   @override
-  void initState() {
+  initState() {
     loadJson();
-    _privateKeyEditingController.text = SystemInfo.shared().privateKey;
+    getlocallog();
     super.initState();
+  }
+
+  getlocallog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? privatekey = prefs.getString('privatekey');
+    if (privatekey != null && privatekey.isNotEmpty) {
+      _privateKeyEditingController.text = privatekey;
+    }
+    setState(() {});
   }
 
   loadJson() async {
     String jsonContent = await rootBundle.loadString("assets/json/abi.json");
     SystemInfo.jsonData = jsonContent;
-    print(SystemInfo.jsonData);
+
+    String erc20jsonContent =
+        await rootBundle.loadString("assets/json/erc20.json");
+    SystemInfo.erc20jsonData = erc20jsonContent;
   }
 
   @override
@@ -52,17 +66,25 @@ class _ConnectPageState extends State<ConnectPage> {
         minTextAdapt: true,
         orientation: Orientation.portrait);
     return Scaffold(
-      backgroundColor: SystemInfo.shared().loginbackgroundColor,
-      //内容区域
-      body: CustomScrollView(
-        //physics: const NeverScrollableScrollPhysics(),
-        slivers: <Widget>[
-          _buildLogoView(),
-          _buildPrivateKeyInputView(),
-          _buildConnectView(),
-        ],
-      ),
-    );
+        backgroundColor: SystemInfo.shared().loginbackgroundColor,
+        //内容区域
+        body: GestureDetector(
+          onTap: () {
+            FocusScopeNode currentFocus = FocusScope.of(context);
+            if (!currentFocus.hasPrimaryFocus &&
+                currentFocus.focusedChild != null) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: CustomScrollView(
+            //physics: const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[
+              _buildLogoView(),
+              _buildPrivateKeyInputView(),
+              _buildConnectView(),
+            ],
+          ),
+        ));
   }
 
   SliverToBoxAdapter _buildLogoView() {
@@ -132,78 +154,90 @@ class _ConnectPageState extends State<ConnectPage> {
     return SliverToBoxAdapter(
         child: Padding(
             padding: EdgeInsets.only(top: 30.w, left: 35.w, right: 35.w),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(12.w)),
-              ),
-              child: Stack(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(left: 20.w, top: 6.w),
-                    child: Container(
-                        width: 240.w,
-                        height: 40.w,
-                        child: TextField(
-                          keyboardType: TextInputType.text,
-                          cursorColor: HexColor.fromHex('5C8987'),
-                          cursorHeight: 18.w,
-                          cursorRadius: Radius.circular(2.w),
-                          cursorWidth: 2.w,
-                          controller: _privateKeyEditingController,
-                          showCursor: true,
-                          maxLines: 2,
-                          maxLength: 40,
-                          autofocus: false,
-                          style: TextStyle(fontSize: 16.sp),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            isCollapsed: false,
-                            counterText: '',
-                            hintText: 'Paste your private key here',
-                            hintStyle: TextStyle(
-                                color: Colors.grey.withOpacity(0.5),
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          onSubmitted: (str) {},
-                          textInputAction: TextInputAction.done,
-                          onChanged: (content) {
-                            setState(() {});
-                          },
-                        )),
+            child: Column(
+              children: [
+                Text('Paste your private key here.',
+                    style: TextStyle(
+                        color: Colors.grey.withOpacity(0.5),
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold)),
+                SizedBox(
+                  height: 10.w,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(12.w)),
                   ),
-                  Padding(
-                      padding:
-                          EdgeInsets.only(left: 270.w, top: 4.w, right: 30.w),
-                      child: _privateKeyEditingController.text.isNotEmpty
-                          ? IconButton(
-                              //如果文本长度不为空则显示清除按钮
-                              onPressed: () {
-                                setState(() {
-                                  _privateKeyEditingController.clear();
-                                });
+                  child: Stack(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(left: 20.w, top: 6.w),
+                        child: Container(
+                            width: 240.w,
+                            height: 120.w,
+                            child: TextField(
+                              keyboardType: TextInputType.text,
+                              cursorColor: HexColor.fromHex('5C8987'),
+                              cursorHeight: 18.w,
+                              cursorRadius: Radius.circular(2.w),
+                              cursorWidth: 2.w,
+                              controller: _privateKeyEditingController,
+                              showCursor: true,
+                              maxLines: 5,
+                              maxLength: 100,
+                              autofocus: false,
+                              style: TextStyle(fontSize: 16.sp),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                isCollapsed: false,
+                                counterText: '',
+                                hintText: 'Paste your private key here',
+                                hintStyle: TextStyle(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              onSubmitted: (str) {},
+                              textInputAction: TextInputAction.done,
+                              onChanged: (content) {
+                                setState(() {});
                               },
-                              icon: Icon(Icons.cancel_rounded,
-                                  size: 20.w,
-                                  color: Colors.grey.withOpacity(0.4)),
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                            )
-                          : null),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(left: 30.w, top: 55.w, right: 30.w),
-                    child: Divider(
-                      color: Colors.grey[300]!.withOpacity(0),
-                      height: 0.w,
-                      thickness: 0.5.w,
-                      indent: 11.w,
-                      endIndent: 11.w,
-                    ),
-                  )
-                ],
-              ),
+                            )),
+                      ),
+                      Padding(
+                          padding: EdgeInsets.only(
+                              left: 270.w, top: 69.w, right: 30.w),
+                          child: _privateKeyEditingController.text.isNotEmpty
+                              ? IconButton(
+                                  //如果文本长度不为空则显示清除按钮
+                                  onPressed: () {
+                                    setState(() {
+                                      _privateKeyEditingController.clear();
+                                    });
+                                  },
+                                  icon: Icon(Icons.cancel_rounded,
+                                      size: 20.w,
+                                      color: Colors.grey.withOpacity(0.4)),
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                )
+                              : null),
+                      Padding(
+                        padding:
+                            EdgeInsets.only(left: 30.w, top: 55.w, right: 30.w),
+                        child: Divider(
+                          color: Colors.grey[300]!.withOpacity(0),
+                          height: 0.w,
+                          thickness: 0.5.w,
+                          indent: 11.w,
+                          endIndent: 11.w,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
             )));
   }
 
@@ -223,10 +257,15 @@ class _ConnectPageState extends State<ConnectPage> {
               ? () async {
                   SystemInfo.shared().privateKey =
                       _privateKeyEditingController.text;
-                  var res = [];
-                  res = await Contract().getTotalTokens();
-                  if (res.isNotEmpty) {
-                    gotoHomePage(context);
+
+                  if (Contract().checkkey(_privateKeyEditingController.text)) {
+                    MyToast.show(
+                        'The public-private key is verified successfully.');
+                    connectStep();
+                    getpreparedinfo();
+                  } else {
+                    MyToast.show('Public key private key verification failed.');
+                    return;
                   }
                 }
               : null,
@@ -255,6 +294,36 @@ class _ConnectPageState extends State<ConnectPage> {
         ),
       ),
     ));
+  }
+
+  connectStep() async {
+    //share preference
+    // Obtain shared preferences.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('privatekey', _privateKeyEditingController.text);
+  }
+
+  getpreparedinfo() async {
+    var res = [];
+    res = await Contract().getTotalTokens();
+
+    for (int i = 0; i < SystemInfo.shared().tokenList.length; i++) {
+      List temp = await Contract()
+          .getNameWithToken(SystemInfo.shared().tokenList[i].toString());
+
+      if (!SystemInfo.shared().nameList.contains(temp[0])) {
+        SystemInfo.shared().nameList.add(temp[0]);
+      }
+    }
+
+    print(SystemInfo.shared().nameList);
+
+    if (SystemInfo.shared().nameList.isNotEmpty) {
+      MyToast.show('Connect Success');
+      gotoHomePage(context);
+    } else {
+      MyToast.show('check your network!');
+    }
   }
 
   gotoHomePage(BuildContext context) {

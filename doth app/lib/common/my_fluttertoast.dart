@@ -15,13 +15,22 @@ class MyToast {
     );
   }
 
-  ///警告类
-  static warn(String msg) {
+  ///公告类
+  static notice(String msg) {
     Fluttertoast.cancel();
     Fluttertoast.showToast(
         msg: msg,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color.fromARGB(255, 162, 153, 20));
+        gravity: ToastGravity.TOP,
+        backgroundColor: const Color.fromARGB(255, 177, 39, 34));
+  }
+
+  //通知类
+  static show(String msg) {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+        msg: msg,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Color.fromARGB(255, 93, 84, 84));
   }
 
   ///错误类

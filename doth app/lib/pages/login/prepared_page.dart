@@ -130,12 +130,12 @@ class _PreparedPageState extends State<PreparedPage> {
           onPressed: () {
             //setIntialLTV();
 
-            //deposit();
+            deposit();
             //borrow();
             //withdraw();
             //repayByCollateral();
 
-            getTotalTokens();
+            //getTotalTokens();
           },
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -163,11 +163,6 @@ class _PreparedPageState extends State<PreparedPage> {
     String jsonContent = await rootBundle.loadString("assets/json/abi.json");
     SystemInfo.jsonData = jsonContent;
     print(SystemInfo.jsonData);
-
-    // var dio = Dio();
-    // Response response = await dio.get(
-    //     'https://api-kovan.etherscan.io/api?module=contract&action=getsourcecode&address=0xd0a1e359811322d97991e03f863a0c30c2cf029c&apikey=J9X1N328EU7FG42MRUMVNE35A264APAQ3S');
-    // print(response.data['result']['ABI']);
   }
 
   void getABIwithToken() async {
@@ -177,8 +172,6 @@ class _PreparedPageState extends State<PreparedPage> {
         "https://api-kovan.etherscan.io/api?module=contract&action=getsourcecode&address=0xd0a1e359811322d97991e03f863a0c30c2cf029c&apikey=J9X1N328EU7FG42MRUMVNE35A264APAQ3S";
 
     var response = await dio.get(url);
-
-    print(response.data['result'][0]['ABI']);
 
     getNameWithToken(response.data['result'][0]['ABI']);
     approve(response.data['result'][0]['ABI']);
@@ -236,31 +229,31 @@ class _PreparedPageState extends State<PreparedPage> {
 
   ///Smart Contract write
   ///setIntialLTV   ok!
-  // setIntialLTV() async {
-  //   final client = Web3Client(SystemInfo.shared().rpcUrl, Client());
+  setIntialLTV() async {
+    final client = Web3Client(SystemInfo.shared().rpcUrl, Client());
 
-  //   final credentials = EthPrivateKey.fromHex(SystemInfo.shared().privateKey);
-  //   //final address = credentials.address;
-  //   final contract = DeployedContract(
-  //       ContractAbi.fromJson(SystemInfo.jsonData, ''),
-  //       SystemInfo.shared().doth_address);
+    final credentials = EthPrivateKey.fromHex(SystemInfo.shared().privateKey);
+    //final address = credentials.address;
+    final contract = DeployedContract(
+        ContractAbi.fromJson(SystemInfo.jsonData, ''),
+        SystemInfo.shared().doth_address);
 
-  //   final setIntialLTV = contract.function('setIntialLTV');
+    final setIntialLTV = contract.function('setIntialLTV');
 
-  //   var res = await client.sendTransaction(
-  //       credentials,
-  //       Transaction.callContract(
-  //           contract: contract,
-  //           function: setIntialLTV,
-  //           parameters: [BigInt.from(6600)]),
-  //       chainId: 42);
+    var res = await client.sendTransaction(
+        credentials,
+        Transaction.callContract(
+            contract: contract,
+            function: setIntialLTV,
+            parameters: [BigInt.from(6600)]),
+        chainId: 42);
 
-  //   hash = res;
+    hash = res;
 
-  //   print(res + 'current');
+    print(res + 'current');
 
-  //   await client.dispose();
-  // }
+    await client.dispose();
+  }
 
   ///deposit ok！
   deposit() async {
@@ -312,9 +305,7 @@ class _PreparedPageState extends State<PreparedPage> {
     var res = await client.sendTransaction(
         credentials,
         Transaction.callContract(
-            contract: contract,
-            function: borrow,
-            parameters: [BigInt.from(10)]),
+            contract: contract, function: borrow, parameters: [BigInt.from(0)]),
         chainId: 42);
 
     print(res);

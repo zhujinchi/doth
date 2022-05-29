@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:doth/common/contract.dart';
 import 'package:doth/common/my_fluttertoast.dart';
 import 'package:flutter/gestures.dart';
@@ -21,11 +24,13 @@ class _DepositScreenState extends State<DepositScreen> {
   final TextEditingController _amountDepositedEditingController =
       TextEditingController();
 
-  List<String> _animals = ["Dog", "Cat", "Crocodile", "Dragon"];
-
-  String? _selectedColor = 'wai';
+  String? _selectedToken = SystemInfo.shared().nameList[0];
 
   String _available = SystemInfo.shared().amountList[1].toString();
+
+  String _pavalue = '';
+
+  int _tokenindex = 0;
 
   @override
   void initState() {
@@ -34,11 +39,13 @@ class _DepositScreenState extends State<DepositScreen> {
   }
 
   void _refresh() async {
-    Contract().getTotalTokens();
-    // for (String items in SystemInfo.shared().tokenList) {
-    //   Contract().getABIwithToken(items);
-    // }
-    //tokennameList = SystemInfo.shared().nameList;
+    var res = await Contract().apy();
+    BigInt temp = res[0];
+
+    setState(() {
+      //_pavalue = res[0] / BigInt.from(pow(10, 6)).toRadixString(2);
+      _pavalue = (temp.toInt() / 1000000).toString();
+    });
   }
 
   @override
@@ -145,7 +152,7 @@ class _DepositScreenState extends State<DepositScreen> {
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             icon: const Icon(Icons.keyboard_arrow_down),
-                            value: _selectedColor,
+                            value: _selectedToken,
                             items:
                                 SystemInfo.shared().nameList.map((String kind) {
                               return DropdownMenuItem(
@@ -159,27 +166,28 @@ class _DepositScreenState extends State<DepositScreen> {
                                         fontSize: 23.sp,
                                       ),
                                     ),
-                                    // Text(
-                                    //   " to be set",
-                                    //   style: TextStyle(
-                                    //     color: Colors.black87,
-                                    //     fontWeight: FontWeight.bold,
-                                    //     fontSize: 23.sp,
-                                    //   ),
-                                    // ),
                                   ],
                                 ),
                                 value: kind,
                               );
                             }).toList(),
                             onChanged: (String? value) {
-                              _selectedColor = value.toString();
+                              _selectedToken = value.toString();
                               int i = SystemInfo.shared()
                                   .nameList
                                   .indexOf(value.toString());
-
+                              _tokenindex = i;
                               _available =
                                   SystemInfo.shared().amountList[i].toString();
+
+                              MyToast.show('Changed the token type!\n' +
+                                  'name:' +
+                                  SystemInfo.shared().nameList[_tokenindex] +
+                                  '\n' +
+                                  'token:' +
+                                  SystemInfo.shared()
+                                      .tokenList[_tokenindex]
+                                      .toString());
                               setState(() {});
                             },
                           ),
@@ -188,30 +196,6 @@ class _DepositScreenState extends State<DepositScreen> {
                 ],
               ),
             ),
-            Padding(
-                padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Text(
-                      'Available:',
-                      style: TextStyle(
-                        color: Colors.black87.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    Text(
-                      _available,
-                      style: TextStyle(
-                        color: Colors.black87.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
-                      ),
-                    ),
-                  ],
-                )),
             Padding(
               padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
               child: Divider(
@@ -260,13 +244,25 @@ class _DepositScreenState extends State<DepositScreen> {
           ),
           Padding(
             padding: EdgeInsets.only(left: 20.w, top: 122.w),
-            child: Text(
-              '3.5% p.a. Expected to arrive within 2hours',
-              style: TextStyle(
-                color: Colors.black87.withOpacity(0.9),
-                fontWeight: FontWeight.bold,
-                fontSize: 13.sp,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  _pavalue,
+                  style: TextStyle(
+                    color: Colors.red.withOpacity(0.9),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                Text(
+                  '% p.a. Expected to arrive within 2hours',
+                  style: TextStyle(
+                    color: Colors.black87.withOpacity(0.9),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
@@ -275,7 +271,8 @@ class _DepositScreenState extends State<DepositScreen> {
                 width: 260.w,
                 height: 40.w,
                 child: TextField(
-                  keyboardType: TextInputType.number,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   cursorColor: HexColor.fromHex('5C8987'),
                   cursorHeight: 18.w,
                   cursorRadius: Radius.circular(2.w),
@@ -345,14 +342,34 @@ class _DepositScreenState extends State<DepositScreen> {
         padding:
             EdgeInsets.only(left: 15.w, right: 15.w, top: 15.w, bottom: 0.w),
         child: OutlinedButton(
-          onPressed: () {},
+          onPressed: _amountDepositedEditingController.text.isNotEmpty
+              ? () async {
+                  bool isapproved = await Contract().approve(
+                      SystemInfo.erc20jsonData,
+                      SystemInfo.shared().tokenList[_tokenindex].toString(),
+                      double.parse(_amountDepositedEditingController.text));
+                  if (isapproved) {
+                    await Contract().deposit(
+                        SystemInfo.shared().tokenList[_tokenindex].toString(),
+                        double.parse(_amountDepositedEditingController.text));
+                    showOkAlertDialog(
+                        context: context, title: 'Deposit success');
+                  }
+                  _amountDepositedEditingController.clear();
+                }
+              : null,
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.w),
             ),
-            backgroundColor: SystemInfo.shared().themeColor,
-            side:
-                BorderSide(width: 0.5.w, color: SystemInfo.shared().themeColor),
+            backgroundColor: _amountDepositedEditingController.text.isNotEmpty
+                ? SystemInfo.shared().themeColor
+                : Colors.grey.withOpacity(0.3),
+            side: BorderSide(
+                width: 0.5.w,
+                color: _amountDepositedEditingController.text.isNotEmpty
+                    ? SystemInfo.shared().themeColor
+                    : Colors.grey.withOpacity(0.3)),
           ),
           child: Text(
             "Confirm the deposit",

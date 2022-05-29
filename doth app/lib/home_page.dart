@@ -40,8 +40,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     pages
-      ..add(const BorrowScreen())
       ..add(const DepositScreen())
+      ..add(const BorrowScreen())
       ..add(const WalletScreen())
       ..add(const ProfileScreen());
     _init();
@@ -87,22 +87,6 @@ class _HomePageState extends State<HomePage> {
       items: <MyBottomNavigationBarItem>[
         MyBottomNavigationBarItem(
           icon: Image.asset(
-            'assets/icons/bottom_borrow.png',
-            width: 24,
-            height: 24,
-          ),
-          iconUnselected: Image.asset(
-            'assets/icons/bottom_borrow_grey.png',
-            width: 24,
-            height: 24,
-          ),
-          title: Text(titles[0]),
-          activeColor: SystemInfo.shared().themeColor,
-          inactiveColor: _inactiveColor,
-          textAlign: TextAlign.center,
-        ),
-        MyBottomNavigationBarItem(
-          icon: Image.asset(
             'assets/icons/bottom_deposit.png',
             width: 24,
             height: 24,
@@ -113,6 +97,22 @@ class _HomePageState extends State<HomePage> {
             height: 24,
           ),
           title: Text(titles[1]),
+          activeColor: SystemInfo.shared().themeColor,
+          inactiveColor: _inactiveColor,
+          textAlign: TextAlign.center,
+        ),
+        MyBottomNavigationBarItem(
+          icon: Image.asset(
+            'assets/icons/bottom_borrow.png',
+            width: 24,
+            height: 24,
+          ),
+          iconUnselected: Image.asset(
+            'assets/icons/bottom_borrow_grey.png',
+            width: 24,
+            height: 24,
+          ),
+          title: Text(titles[0]),
           activeColor: SystemInfo.shared().themeColor,
           inactiveColor: _inactiveColor,
           textAlign: TextAlign.center,
