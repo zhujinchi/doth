@@ -29,7 +29,7 @@ def handle_event(event):
     print(event)
     data = event['data']
     print(data)
-    user_address = data[:66]
+    user_address = f'0x{data[26:66]}'
     email_format = int(data[67:], 16)
     print(f'user_address: {user_address}, email_format: {email_format}')
     # TODO get email address from database
@@ -64,3 +64,5 @@ def event_listener_start():
 
 # if __name__ == '__main__':
 #     event_listener_start()
+#     while True:
+#         time.sleep(1)
