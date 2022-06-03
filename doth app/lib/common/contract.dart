@@ -16,25 +16,6 @@ import 'package:http/http.dart';
 import '../../data/system_info.dart';
 
 class Contract {
-  // Future<List> getABIwithToken(String tokenaddress) async {
-  //   MyToast.notice('getABIwithToken api start');
-
-  //   var dio = Dio();
-  //   dio.options.receiveTimeout = 15000;
-  //   String url =
-  //       "https://api-kovan.etherscan.io/api?module=contract&action=getsourcecode&address=" +
-  //           tokenaddress +
-  //           "&apikey=J9X1N328EU7FG42MRUMVNE35A264APAQ3S";
-
-  //   var response = await dio.get(url);
-
-  //   String addabi = response.data['result'][0]['ABI'];
-
-  //   String addname = response.data['result'][0]['ContractName'];
-
-  //   return [addabi, addname];
-  // }
-
   Future<List> getNameWithToken(String tokenaddress) async {
     //MyToast.notice('');
     final client = Web3Client(SystemInfo.shared().rpcUrl, Client()); //

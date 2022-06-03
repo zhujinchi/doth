@@ -7,11 +7,14 @@ class User {
     return _instance;
   }
 
-  //用户信息
+  //user info
   late String id;
   late String userName;
   late String userPhone;
 
-  //设备是否支持
+  //
   bool canVibrate = true;
+
+  //transection paypal
+  String deal_id = '';
 }

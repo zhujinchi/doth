@@ -32,8 +32,9 @@ class _WalletScreenState extends State<WalletScreen>
 
   @override
   void initState() {
-    _refresh();
     super.initState();
+    _refresh();
+    setState(() {});
   }
 
   void _refresh() async {
@@ -74,12 +75,13 @@ class _WalletScreenState extends State<WalletScreen>
     setState(() {});
 
     ///get User paypel value
+    String ppvalue = await API().getPaypalAccount();
 
-    setState(() async {
-      paypalValue = await API().getPaypalAccount();
+    setState(() {
+      paypalValue = ppvalue;
     });
-    // showOkAlertDialog(context: context, title: 'refresh success');
-    MyToast.show('refresh success');
+
+    MyToast.show('wallet info refresh success!');
   }
 
   @override
@@ -493,6 +495,8 @@ class _WalletScreenState extends State<WalletScreen>
                             cancelLabel: 'Cancel',
                           ).then((value) {
                             ///Pay with USD
+                            API()
+                                .repayByUSD(double.parse(value![0].toString()));
                           });
                         },
                         style: OutlinedButton.styleFrom(

@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:doth/common/my_fluttertoast.dart';
 import 'package:doth/data/system_info.dart';
+import 'package:doth/data/user.dart';
 
 class API {
   dynamic register(String firstname, String lastname, String phoneNumber,
@@ -28,7 +29,7 @@ class API {
     map['password'] = passwordmd5;
     map['public_key'] = publicKey;
 
-    ///发起post请求
+    ///post
     Response response = await dio.post(url, queryParameters: map);
 
     var data = response.data;
@@ -54,7 +55,7 @@ class API {
     map['email'] = email;
     map['password'] = passwordmd5;
 
-    ///发起post请求
+    ///post
     Response response = await dio.post(url, queryParameters: map);
 
     var data = response.data;
@@ -62,11 +63,120 @@ class API {
     return data;
   }
 
-  buildtransection(double amount) {}
+  Future<String> buildtransection(double amount) async {
+    MyToast.notice('buildtransection api start');
 
-  transferByPaypal(double amount) {}
+    String url = "http://1.14.103.90:5000/paypal_create";
 
-  repayByUSD(double amount) {}
+    ///build Dio
+    Dio dio = Dio();
+
+    dio.options.headers['Authorization'] = SystemInfo.shared().token;
+
+    ///build map
+    Map<String, dynamic> map = {};
+
+    map['amount_USD'] = amount.toString();
+
+    ///post
+    Response response = await dio.post(url, queryParameters: map);
+
+    var data = response.data;
+
+    print(data);
+
+    if (data['code'] == 0) {
+    } else if (data['code'] == -1) {
+      MyToast.show('Login token expired. Please try to log in again');
+    } else {
+      MyToast.show('Check your network');
+    }
+
+    if (data['code'] == 0) {
+      MyToast.info('build paypal transaction successfully');
+      User.shared().deal_id = data['data']['id'].toString();
+      transferByPaypal(data['data']['id'].toString());
+    } else {
+      MyToast.info('build paypal transaction fail');
+    }
+
+    return '';
+  }
+
+  transferByPaypal(String id) async {
+    MyToast.notice('transferByPaypal api start');
+
+    String url = "http://1.14.103.90:5000/paypal_borrow";
+
+    ///build Dio
+    Dio dio = Dio();
+
+    dio.options.headers['Authorization'] = SystemInfo.shared().token;
+
+    ///build map
+    Map<String, dynamic> map = {};
+
+    map['deal_id'] = id;
+
+    ///post
+    Response response = await dio.post(url, queryParameters: map);
+
+    var data = response.data;
+
+    print(data);
+
+    if (data['code'] == 0) {
+    } else if (data['code'] == -1) {
+      MyToast.show('Login token expired. Please try to log in again');
+    } else {
+      MyToast.show('Check your network');
+    }
+
+    if (data['code'] == 0) {
+      MyToast.show('Borrow money to your paypal account successfully');
+    } else {
+      MyToast.show(
+          'Borrow money to your paypal account fail, check your network or your token account');
+    }
+  }
+
+  repayByUSD(double amount) async {
+    MyToast.notice('repayByUSD api start');
+
+    String url = "http://1.14.103.90:5000/paypal_return";
+
+    ///build Dio
+    Dio dio = Dio();
+
+    dio.options.headers['Authorization'] = SystemInfo.shared().token;
+
+    ///build map
+    Map<String, dynamic> map = {};
+
+    map['deal_id'] = User.shared().deal_id;
+    map['amount_USD'] = amount;
+
+    ///post
+    Response response = await dio.post(url, queryParameters: map);
+
+    var data = response.data;
+
+    print(data);
+
+    if (data['code'] == 0) {
+    } else if (data['code'] == -1) {
+      MyToast.show('Login token expired. Please try to log in again');
+    } else {
+      MyToast.show('Check your network');
+    }
+
+    if (data['code'] == 0) {
+      MyToast.show('Repay money from your paypal account successfully');
+    } else {
+      MyToast.show(
+          'Repay money from your paypal account fail, check your network or your token account');
+    }
+  }
 
   Future<String> getPaypalAccount() async {
     MyToast.notice('getPaypalAccount api start');
@@ -80,10 +190,12 @@ class API {
 
     dio.options.headers['Authorization'] = SystemInfo.shared().token;
 
-    ///发起get请求
+    ///get
     Response response = await dio.get(url);
 
     var data = response.data;
+
+    print(data);
 
     if (data['code'] == 0) {
     } else if (data['code'] == -1) {

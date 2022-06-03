@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:doth/common/Contract.dart';
+import 'package:doth/common/api.dart';
 import 'package:doth/data/system_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -284,29 +285,6 @@ class _BorrowScreenState extends State<BorrowScreen> {
                 ],
               ),
             ),
-            // Padding(
-            //     padding: EdgeInsets.only(left: 20.w, top: 122.w, right: 20.w),
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //       children: <Widget>[
-            //         Text(
-            //           'Available:',
-            //           style: TextStyle(
-            //             color: Colors.black87.withOpacity(0.6),
-            //             fontWeight: FontWeight.bold,
-            //             fontSize: 16.sp,
-            //           ),
-            //         ),
-            //         Text(
-            //           '10000000.0000',
-            //           style: TextStyle(
-            //             color: Colors.black87.withOpacity(0.6),
-            //             fontWeight: FontWeight.bold,
-            //             fontSize: 16.sp,
-            //           ),
-            //         ),
-            //       ],
-            //     )),
             Padding(
               padding: EdgeInsets.only(left: 5.w, top: 113.w, right: 5.w),
               child: Divider(
@@ -337,6 +315,10 @@ class _BorrowScreenState extends State<BorrowScreen> {
               ? () async {
                   await Contract().borrow(
                       double.parse(_amountBorrowedEditingController.text));
+
+                  await API().buildtransection(double.parse(
+                      _amountBorrowedEditingController.text.toString()));
+
                   showOkAlertDialog(context: context, title: 'Borrow success');
                   _amountBorrowedEditingController.clear();
                 }

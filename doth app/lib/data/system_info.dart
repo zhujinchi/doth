@@ -13,7 +13,7 @@ class SystemInfo {
     return _instance;
   }
 
-  //系统信息
+  //system info
   late Double statusBarHeight;
   late Double bottomBarHeight;
   Color themeColor = HexColor.fromHex('2927a4');

@@ -5,7 +5,7 @@ import '../data/system_info.dart';
 
 ///自定义toast弹窗
 class MyToast {
-  ///通知类
+  ///info
   static info(String msg) {
     Fluttertoast.cancel();
     Fluttertoast.showToast(
@@ -15,7 +15,7 @@ class MyToast {
     );
   }
 
-  ///公告类
+  ///notice
   static notice(String msg) {
     Fluttertoast.cancel();
     Fluttertoast.showToast(
@@ -24,7 +24,7 @@ class MyToast {
         backgroundColor: const Color.fromARGB(255, 177, 39, 34));
   }
 
-  //通知类
+  //show
   static show(String msg) {
     Fluttertoast.cancel();
     Fluttertoast.showToast(
@@ -33,7 +33,7 @@ class MyToast {
         backgroundColor: Color.fromARGB(255, 93, 84, 84));
   }
 
-  ///错误类
+  ///error
   static error(String msg) {
     Fluttertoast.cancel();
     Fluttertoast.showToast(
