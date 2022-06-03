@@ -351,3 +351,5 @@ def get_user_txn_hash_list(user_addr, contract_addr=DOTH_CONTRACT_ADDRESS):
 # print(getUserSingleTokenValue('0x6595cd432df8693C6b9f4e318Ea4A452614C726B', '0xd0A1E359811322d97991E03f863a0C30C2cF029C'))
 # print(getUserTotalValue('0x6595cd432df8693C6b9f4e318Ea4A452614C726B'))
 # print(getTokenPriceFeedAddress('0xd0A1E359811322d97991E03f863a0C30C2cF029C'))
+
+# print(get_user_txn_hash_list('0x6595cd432df8693C6b9f4e318Ea4A452614C726B'))
