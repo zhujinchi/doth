@@ -7,35 +7,32 @@ import VO.my_response as R
 
 auth = HTTPTokenAuth(scheme='JWT')
 
-# 私钥 最好单独存储
 SECRET_KEY = "2bf9fdb6-d94c-4942-b383-2e116f6de7c7"
 
 
 @auth.verify_token
 def verify_token(token):
-    """token校验"""
     s = Serializer(SECRET_KEY)
     try:
         data = s.loads(token)
     except BadSignature:
-        print("token错误")
+        print("token not match")
         return False
     except SignatureExpired:
-        print("token过期")
+        print("token expired")
         return False
     return True
 
 
 @auth.error_handler
 def errortoken_auth():
-    return make_response(R.error(msg="token错误或过期"), 401)
+    # code 100
+    return make_response(R.error(code=100, msg="token not match or expired"), 401)
 
 
 @auth.get_user_roles
-def get_user_roles(token):
-    """token鉴权"""
-    # 拿到实际token值而非对象
-    token = token['token']
+def get_user_roles(header):
+    token = header['token']
     s = Serializer(SECRET_KEY)
     try:
         user = s.loads(token)
@@ -45,19 +42,16 @@ def get_user_roles(token):
 
 
 def create_token(user_id, role="user"):
-    """token生成 默认为普通用户"""
     s = Serializer(SECRET_KEY, expires_in=3600)
     token = s.dumps({"id": user_id, "role": role}).decode('ascii')
     return token
 
 
 def get_user():
-    """从token中获取用户ID"""
     token = auth.get_auth()['token']
     s = Serializer(SECRET_KEY)
     try:
         user = s.loads(token)
         return user
-
     except Exception as e:
         return None

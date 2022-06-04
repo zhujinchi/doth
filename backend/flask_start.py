@@ -24,9 +24,9 @@ from paypalhttp.encoder import Encoder
 from paypalpayoutssdk.core import PayPalHttpClient, SandboxEnvironment
 from paypalcheckoutsdk.orders import OrdersCreateRequest
 from paypalcheckoutsdk.orders import OrdersCaptureRequest
+import event_listener 
 
-app = Flask(__name__, static_url_path="", static_folder="/public")
-YOUR_DOMAIN = "http://localhost:5050"
+app = Flask(__name__, static_url_path="")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database/test.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
@@ -35,7 +35,7 @@ db = SQLAlchemy(app)
 
 MY_DOMAIN = "http://1.14.103.90:5000"
 
-# paypal环境 后台
+# paypal Config back end
 business_address = "doth_test_business@test.com"
 client_id = (
     "AU053UWAC0R5AmO_gq6DELT9n7ikP8ljzAUMzQBLOHTl4GuVVnatUXn9_CpT2xIM5qayeqK0YsY-rosW"
@@ -46,7 +46,7 @@ client_secret = (
 environment = SandboxEnvironment(client_id=client_id, client_secret=client_secret)
 client = PayPalHttpClient(environment)
 
-# paypal环境 公共用户
+# paypal Config public_wallet
 business_address_pub = "doth_test_business@test.pub"
 client_id_pub = (
     "AZP84ChZGra7qnviyFy7tqa3xvlLevnt_4yH0UT7zHM6cj-ph3Ezy6YiRsp166okb8Ocpd5fvG3AQGK2"
@@ -57,7 +57,7 @@ client_secret_pub = (
 environment_pub = SandboxEnvironment(
     client_id=client_id_pub, client_secret=client_secret_pub
 )
-client_pub = PayPalHttpClient(environment)
+client_pub = PayPalHttpClient(environment_pub)
 
 
 @app.route("/hello")
@@ -67,7 +67,7 @@ def hello():
 
 @app.route("/register", methods=["POST"])
 def register():
-    """注册"""
+    """register"""
     if request.method == "POST":
         new_user = D.User(
             firstname=request.args["firstname"],
@@ -75,63 +75,64 @@ def register():
             telephone=request.args["telephone"],
             password=request.args["password"],
             email=request.args["email"],
+            public_key=request.args['public_key']
         )
         db.session.add(new_user)
         try:
             db.session.commit()
         except Exception as e:
-            return R.error(msg="注册失败", data=e.args[0])
-        return R.ok(msg="注册成功")
+            return R.error(msg="Register Fail", data=e.args[0])
+        return R.ok(msg="Register Success")
 
 
 @app.route("/login", methods=["POST"])
 def login():
-    """登录"""
+    """Login"""
     if request.method == "POST":
-        login_user = D.User.query.filter(
-            D.User.telephone == request.args["telephone"]
+        login_user = db.session.query(D.User).filter(
+            D.User.email == request.args["email"]
         ).first()
         if login_user is None:
-            return R.error(msg="用户不存在")
+            return R.error(msg="User Not Found")
         if login_user.password == request.args["password"]:
             # JWT token
             token = my_token.create_token(login_user.id)
-            return R.ok(msg="登录成功", data="JWT " + token)
+            return R.ok(msg="Login Success", data={"token":"JWT " + token, "public_key":login_user.public_key, "user":R.queryToDict(login_user)})
         else:
-            return R.error(msg="密码错误")
+            return R.error(msg="Password Incorrect")
 
 
 @app.route("/logout", methods=["POST"])
 @auth.login_required()
 def logout():
-    """登出 JWT由客户端负责清除"""
+    """logout"""
     if request.method == "POST":
-        return R.ok(msg="登出成功")
+        return R.ok()
 
 
 @app.route("/token_test_admin", methods=["POST", "GET"])
 @auth.login_required(role="admin")
 def token_test_admin():
-    """token测试"""
-    return R.ok(data="管理员token测试通过")
+    """token test"""
+    return R.ok(data="admin token test pass")
 
 
 @app.route("/token_test", methods=["POST", "GET"])
 @auth.login_required()
 def token_test():
-    """token测试"""
-    # 拿到当前用户
+    """token test"""
+    # get current user
     this_user = my_token.get_user()
-    return R.ok(msg=f"普通用户token测试通过", data=this_user)
+    return R.ok(msg=f"user token test pass", data=this_user)
 
 
 @app.route("/paypal_create", methods=["POST"])
 @auth.login_required()
 def paypal_create():
-    """PayPal创建一个交易 之后才能进行抵押转账等操作"""
+    """PayPal create a deal"""
     amount_usd = request.args["amount_USD"]
     if check_arg_None(amount_usd):
-        return R.error(msg="交易额[amount_USD]不能为空")
+        return R.error(msg="[amount_USD] can not be null")
 
     user_id = my_token.get_user()["id"]
     new_deal = D.Deal(
@@ -145,15 +146,15 @@ def paypal_create():
     db.session.add(new_deal)
     try:
         db.session.commit()
-        return R.ok(msg="交易创建成功", data=R.queryToDict(new_deal))
+        return R.ok(msg="Deal Create Success", data=R.queryToDict(new_deal))
     except Exception as e:
-        return R.error(msg="交易创建失败", data=e.args[0])
+        return R.error(msg="Deal Create Fail", data=e.args[0])
 
 
 @app.route("/paypal_list", methods=["GET"])
 @auth.login_required()
 def paypal_list():
-    """查询公共账号下所有的交易记录"""
+    """query all deal records of the public wallet"""
     user_id = my_token.get_user()["id"]
     deal_list = D.Deal.query.all()
     deal_list = R.queryToDict(deal_list)
@@ -163,22 +164,21 @@ def paypal_list():
 @app.route("/paypal_borrow", methods=["POST"])
 @auth.login_required()
 def paypal_borrow():
-    """paypal 用户从后台借款 借款前已完成抵押操作"""
+    """user borrow"""
     deal_id = request.args["deal_id"]
     if check_arg_None(deal_id):
-        return R.error(msg="交易ID[deal_id]不能为空")
+        return R.error(msg="[deal_id] can not be null")
     user_address = business_address_pub
     user_id = my_token.get_user()["id"]
-    # 先判断deal_id是否有效
+    # varify deal
     deal = D.Deal.query.filter(D.Deal.id == deal_id, D.Deal.user_id == user_id).first()
     if deal is None:
-        return R.error(msg="交易不存在")
+        return R.error(msg="Deal Not Found")
     if deal.deal_status != 0:
-        return R.error(msg="交易已放款")
-    # 借款金额为创建时后台支出金额
+        return R.error(msg="Deal Has Been Loan")
     amount_usd = deal.payout
     amount_usd = str(amount_usd)
-    # 用当前时间+随机数设置uuid
+    # make paypal item uuid
     time_str = (
         datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         + "R"
@@ -219,9 +219,10 @@ def paypal_borrow():
             print("Error location: " + detail["location"])
             print("Error field: " + detail["field"])
             print("Error issue: " + detail["issue"])
+        return R.error(msg=error)
     except IOError as ioe:
-        print(ioe.message)
-    # 后台记录该次交易
+        return R.error(msg=ioe.message)
+    # insert this deal
     new_deal_record = D.DealRecord(
         user_id=user_id,
         deal_id=deal_id,
@@ -232,48 +233,47 @@ def paypal_borrow():
         create_time=datetime.datetime.now(),
     )
     db.session.add(new_deal_record)
-    # 更新deal状态
+    # update this deal status
     db.session.query(D.Deal).get(deal_id).deal_status = 1
     try:
         db.session.commit()
     except Exception as e:
-        return R.error(msg="交易记录失败", data=e.args[0])
-    return R.ok(data="借款完成")
+        return R.error(msg="Deal insert fail", data=e.args[0])
+    return R.ok(data="Borrow Success")
 
 
 @app.route("/paypal_return", methods=["POST", "GET"])
 @auth.login_required()
 def paypal_return():
-    """paypal 用户向后台还款 即支付订单"""
+    """paypal repaying the loan"""
     deal_id = request.args["deal_id"]
     if check_arg_None(deal_id):
-        return R.error(msg="交易ID[deal_id]不能为空")
-    amount = request.args["amout_USD"]
+        return R.error(msg="[deal_id] can not be null")
+    amount = request.args["amount_USD"]
     if check_arg_None(amount):
-        return R.error(msg="还款金额[amout_USD]不能为空")
+        return R.error(msg="[amount_USD] can not be null")
     user_id = my_token.get_user()["id"]
-    # 先判断deal_id是否有效
+    # verify deal_id
     deal = (
         db.session.query(D.Deal)
         .filter(D.Deal.id == deal_id, D.Deal.user_id == user_id)
         .first()
     )
     if deal is None:
-        return R.error(msg="交易不存在")
+        return R.error(msg="Deal not found")
     elif deal.deal_status == 0:
-        return R.error(msg="交易未放款")
+        return R.error(msg="Deal ")
     elif deal.deal_status == 2:
-        return R.error(msg="交易已完成")
+        return R.error(msg="Deal is Done")
     elif deal.deal_status == 3:
-        return R.error(msg="交易被关闭")
-    # 可还金额
+        return R.error(msg="Deal is closed")
+    # user repay max
     return_max = deal.payout - deal.income
     amount = decimal.Decimal(amount)
     if amount > return_max:
-        return R.error(msg=f"高于最高可还金额 {return_max} USD")
+        return R.error(msg=f"Above the max {return_max} USD")
     elif amount < 0.01:
-        return R.error(msg="低于最低可还金额 0.01 USD")
-    # 直接两个写死商户账号转账
+        return R.error(msg="Below the min 0.01 USD")
     time_str = (
         datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         + "R"
@@ -316,7 +316,7 @@ def paypal_return():
             print("Error issue: " + detail["issue"])
     except IOError as ioe:
         print(ioe.message)
-    # 后台记录该次交易
+    # insert this deal
     new_deal_record = D.DealRecord(
         user_id=user_id,
         deal_id=deal_id,
@@ -327,7 +327,7 @@ def paypal_return():
         create_time=datetime.datetime.now(),
     )
     db.session.add(new_deal_record)
-    # 更新deal状态 还齐则完成deal
+    # update this deal, make it done if the rest is 0
     db.session.query(D.Deal).get(deal_id).income += amount
     if amount == return_max:
         db.session.query(D.Deal).get(deal_id).deal_status = 2
@@ -335,18 +335,18 @@ def paypal_return():
     try:
         db.session.commit()
     except Exception as e:
-        return R.error(msg="交易记录失败", data=e.args[0])
-    return R.ok(data=f"还款完成，剩余待还 {return_max-amount} USD")
+        return R.error(msg="Deal insert fail", data=e.args[0])
+    return R.ok(data=f"Repay success, {return_max-amount} USD remaining")
 
 
 @app.route("/paypal_wallet", methods=["POST", "GET"])
 @auth.login_required()
 def paypal_wallet():
-    """用户查询公共钱包"""
+    """query amount of the public wallet"""
     sandbox_res = requests.get(
         url="https://api-3t.sandbox.paypal.com/nvp?USER=sb-a4l1y15352147_api1.business.example.com&PWD=UKRD6QGH5JPY2MDK&SIGNATURE=AsNYSFWu0.jD1ZQKfjjNTLzMsHrNABZwBek14F61FVgyYKVWhuwxbhRh&VERSION=109.0&METHOD=GetBalance&RETURNALLCURRENCIES=0"
     )
-    # 处理返回值
+    # response process
     res_str = sandbox_res.content.decode()
     print(res_str)
     wallet = {}
@@ -354,11 +354,11 @@ def paypal_wallet():
         if s.startswith('L_AMT0'):
             amount = s[s.index("=")+1:]
             wallet["USD"] = unquote(amount)
-    return R.ok(msg="钱包查询成功",data=wallet)
+    return R.ok(data=wallet)
 
 
 def check_arg_None(_arg):
-    """判断参数是否为空"""
+    """return True if the argument is none or empty"""
     if _arg is None:
         return True
     if type(_arg) is str:
@@ -366,6 +366,15 @@ def check_arg_None(_arg):
             return True
     return False
 
+@app.route("/get_email", methods=["POST", "GET"])
+def getEmailByAddress():
+    """get user email from database"""
+    user_address = request.args["user_address"]
+    login_user = db.session.query(D.User).filter(D.User.public_key.like(user_address)).first()
+    user_email = login_user.email
+    return user_email
 
 db.create_all()
+event_listener.event_listener_start()
 app.run(host="0.0.0.0")
+

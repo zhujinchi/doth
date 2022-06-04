@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}
+dashboard
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='/css/dashboard.css') }}">
+<div class="content-wrapper" style="min-height: 926px;">
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title" style="color:#838383;">User Info</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="table-search with-border">
+                            <form method="post">
+                                <div class="input-group">
+                                    <input type="text" name="id" class="form-control" placeholder="ID" style="margin-right=4px;">
+                                    <input type="text" name="firstname" class="form-control" placeholder="Firstname" style="margin-right=4px;">
+                                    <input type="text" name="lastname" class="form-control" placeholder="Lastname" style="margin-right=4px;">
+                                    <input type="text" name="telephone" class="form-control" placeholder="telephone" style="margin-right=4px;">
+                                    <input type="text" name="email" class="form-control" placeholder="Email" style="margin-right=4px;">
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-primary btn-flat">Query</button>
+                                        <button type="reset" class="btn btn-flat">Reset</button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table no-margin table-striped table-hover">
+                                <thead>
+                                    <tr class="table-active">
+                                        <th>ID</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Telephone</th>
+                                        <th>Email</th>
+                                        <th>Address</th>
+                                        <th>Txn</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                        <tr>
+                                            <td>{{ user[0] }}</td>
+                                            <td>{{ user[1] }}</td>
+                                            <td>{{ user[2] }}</td>
+                                            <td>{{ user[3] }}</td>
+                                            <td>{{ user[4] }}</td>
+                                            <td>{{ user[6] }}</td>
+                                            <td><span class="label label-info"><a href="/transact/{{ user[1] }}/{{ user[2] }}/{{ user[6] }}" style="color:white;">Watch</a></span></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

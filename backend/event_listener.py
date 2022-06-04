@@ -12,7 +12,7 @@ from email_format import format_margincall, format_liquidation
 from email_sender import send_mail
 from threading import Thread
 from configparser import ConfigParser
-from flask_start import getEmailByAddress
+import requests
 
 # Load config
 config = ConfigParser()
@@ -31,9 +31,9 @@ def handle_event(event):
     print(data)
     user_address = f'0x{data[26:66]}'
     email_format = int(data[67:], 16)
-    print(f'user_address: {user_address}, email_format: {email_format}')
-    # TODO get email address from database
-    user_email = getEmailByAddress(user_address)
+    # get email address from database
+    user_email = str(requests.get("http://localhost:5000/get_email",params={"user_address":user_address}).text)
+    print(f'user_address: {user_address}, email_address: {user_email}, email_format: {email_format}')
     if email_format == 1:
         send_mail([user_email], "Margin Call", format_margincall)
     elif email_format == 2:
@@ -59,10 +59,9 @@ def event_listener_start():
     )
     worker = Thread(target=log_loop, args=(event_filter, 5), daemon=True)
     worker.start()
+    print("thread start")
     #     # .. do some other stuff
 
 
 # if __name__ == '__main__':
 #     event_listener_start()
-#     while True:
-#         time.sleep(1)

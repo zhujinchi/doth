@@ -5,7 +5,6 @@
 @Author  :   Zejiang Yang
 '''
 
-import socks
 import smtplib
 from email.utils import COMMASPACE
 from email.header import Header
@@ -69,6 +68,7 @@ def send_mail(
     # msg_root.attach(att)
 
     try:
+        print('---smtp connecting---')
         smtp = smtp_connect()
         print('---email sending---')
         smtp.sendmail(sender, receivers, msg_root.as_string())
@@ -77,7 +77,7 @@ def send_mail(
         print('---smtp closed---')
         print('')
     except Exception as e:
-        print('fail to send')
+        print(f'fail to send: {e}')
         print('')
 
 

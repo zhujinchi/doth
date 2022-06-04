@@ -1,7 +1,7 @@
-from datetime import datetime as cdatetime  # 有时候会返回datatime类型
+from datetime import datetime as cdatetime
 from datetime import date, time
 from flask_sqlalchemy import Model
-from sqlalchemy import DateTime, Numeric, Date, Time  # 有时又是DateTime
+from sqlalchemy import DateTime, Numeric, Date, Time
 
 R = {"code": None, "msg": None, "data": None}
 
@@ -18,13 +18,6 @@ def error(code=-1, msg="error", data=None):
     R['msg'] = msg
     R['data'] = data
     return R
-
-
-class MyExceptionError(Exception):
-    """自定义异常类"""
-
-    def __init__(self, value):
-        self.value = value
 
 
 def queryToDict(models):
@@ -52,16 +45,14 @@ def queryToDict(models):
             return res
 
 
-# 当结果为result对象列表时，result有key()方法
 def result_to_dict(results):
     res = [dict(zip(r.keys(), r)) for r in results]
-    # 这里r为一个字典，对象传递直接改变字典属性
     for r in res:
         find_datetime(r)
     return res
 
 
-def model_to_dict(model):  # 这段来自于参考资源
+def model_to_dict(model):
     for col in model.__table__.columns:
         if isinstance(col.type, DateTime):
             value = convert_datetime(getattr(model, col.name))
@@ -75,8 +66,7 @@ def model_to_dict(model):  # 这段来自于参考资源
 def find_datetime(value):
     for v in value:
         if isinstance(value[v], cdatetime):
-            value[v] = convert_datetime(value[v])  # 这里原理相似，修改的字典对象，不用返回便可修改
-
+            value[v] = convert_datetime(value[v])
 
 def convert_datetime(value):
     if value:

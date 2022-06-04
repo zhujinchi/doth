@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}
+settings
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='/css/settings.css') }}">
+<div class="content-wrapper" style="min-height: 926px;">
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        <h3 class="box-title" style="color:#838383;">Settings</h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="settings-form1" action="#" method="post">
+                            <div class="form-group">
+                                <div class="form-content">
+                                <div class="form-text">{{ form.apr.label }}</div>
+                                <div class="form-number">{{ apr }}</div>
+                                <div class="form-input">{{ form.apr(placeholder="APR Number") }}</div>
+                                </div>
+                                <div class="form-content">
+                                <div class="form-text">{{ form.apy.label }}</div>
+                                <div class="form-number">{{ apy }}</div>
+                                <div class="form-input">{{ form.apy(placeholder="APY Number") }}</div>
+                                </div>
+                                <div class="form-content">
+                                <div class="form-text">{{ form.initialLTV.label }}</div>
+                                <div class="form-number">{{ initialLTV }}</div>
+                                <div class="form-input">{{ form.initialLTV(placeholder="Initial LTV Number") }}</div>
+                                </div>
+                                <div class="form-content">
+                                <div class="form-text">{{ form.liquidationLTV.label }}</div>
+                                <div class="form-number">{{ liquidationLTV }}</div>
+                                <div class="form-input">{{ form.liquidationLTV(placeholder="Liquidation LTV Number") }}</div>
+                                </div>
+                                <div class="form-content">
+                                <div class="form-text">{{ form.marginCallLTV.label }}</div>
+                                <div class="form-number">{{ marginCallLTV }}</div>
+                                <div class="form-input">{{ form.marginCallLTV(placeholder="Margin Call LTV Number") }}</div>
+                                </div>
+                                <div class="pull-right btn btn-default" style="margin-right: 685px; margin-top: 10px;">
+                                    {{ form.submit }}
+                                </div>
+                            </div>
+                        </form>
+                        <form class="settings-form2" action="#" method="post" style="margin-top: 100px;">
+                            <div class="form-group">
+                                <div class="form-content" style="width: 52%;">
+                                <div class="form-text">{{ form.addToken.label }}</div>
+                                <div class="form-input">{{ form.addToken(placeholder="Token Address") }}</div>
+                                </div>
+                                <div class="form-content" style="width: 52%;">
+                                <div class="form-text">{{ form.removeToken.label }}</div>
+                                <div class="form-input">{{ form.removeToken(placeholder="Token Address") }}</div>
+                                </div>
+                                <div class="form-content" style="width: 52%;">
+                                <div class="form-text">{{ form.feedAddress.label }}</div>
+                                <div class="form-input">{{ form.feedAddress(placeholder="Feed Address") }}</div>
+                                </div>
+                                <div class="pull-right btn btn-default" style="margin-right: 685px; margin-top: 10px;">
+                                    {{ form.submit }}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+
+<!--<div class="modal" id="status" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Status</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for message in get_flashed_messages() %}
+                                          <p>{{ message }}</p>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="modal-footer"></div>
+                                </div>
+                            </div>
+                        </div>-->
+

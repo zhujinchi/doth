@@ -1,0 +1,20 @@
+.form-content {
+  display: flex;
+  width: 40%;
+  margin-bottom: 0.5rem; }
+  .form-content .form-text {
+    flex: 0.8;
+    font-size: large;
+    font-weight: bold;
+    margin-top: 0; }
+  .form-content .form-text > label {
+    margin-bottom: 0; }
+  .form-content .form-number {
+    flex: 0.6;
+    text-align: center;
+    font-size: large; }
+  .form-content .form-input {
+    flex: 1;
+    margin-left: 0.5rem; }
+  .form-content .form-input > input {
+    height: 100%; }

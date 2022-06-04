@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{% block title %} {% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/images/favicon.png') }}">
+<!--    <link href="static/plugins/pg-calendar/css/pignose.calendar.min.css" rel="stylesheet">-->
+<!--    &lt;!&ndash; Chartist &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="static/plugins/chartist/css/chartist.min.css">-->
+<!--    <link rel="stylesheet" href="static/plugins/chartist-plugin-tooltips/css/chartist-plugin-tooltip.css">-->
+<!--    &lt;!&ndash; Custom Stylesheet &ndash;&gt;-->
+<!--    <link href="static/css/style.css" rel="stylesheet">-->
+    <!-- Pignose Calender -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='/plugins/pg-calendar/css/pignose.calendar.min.css') }}">
+    <!-- Chartist -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='/plugins/chartist/css/chartist.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='/plugins/chartist-plugin-tooltips/css/chartist-plugin-tooltip.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='/css/style.css') }}">
+</head>
+<body>
+    <!--  Preloader start  -->
+    <div id="preloader">
+        <div class="loader">
+            <svg class="circular" viewBox="25 25 50 50">
+                <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="3" stroke-miterlimit="10" />
+            </svg>
+        </div>
+    </div>
+    <!--  Nav header start  -->
+    <div class="nav-header">
+        <div class="brand-logo">
+            <span><img src="{{ url_for('static', filename='/images/logo.jpg') }}"></span>
+        </div>
+    </div>
+    <div class="header">
+        <div class="header-content clearfix">
+            <div class="header-right">
+                <ul class="clearfix">
+                    <li class="icons dropdown">
+                        <a href="javascript:void(0)" data-toggle="dropdown">
+                            <i class="mdi mdi-email-outline"></i>
+                            <span class="badge badge-pill gradient-1">1</span>
+                        </a>
+                        <div class="drop-down animated fadeIn dropdown-menu">
+                            <div class="dropdown-content-heading d-flex justify-content-between">
+                                <span class="">1 New Messages</span>
+                                <a href="javascript:void()" class="d-inline-block">
+                                    <span class="badge badge-pill gradient-1">1</span>
+                                </a>
+                            </div>
+                            <div class="dropdown-content-body">
+                                <ul>
+                                    <li class="notification-unread">
+                                        <a href="javascript:void()">
+                                            <img class="float-left mr-3 avatar-img" src="{{ url_for('static', filename='/images/avatar/1.jpg') }}" alt="">
+                                            <div class="notification-content">
+                                                <div class="notification-heading">Development Leader</div>
+                                                <div class="notification-timestamp">08 Hours ago</div>
+                                                <div class="notification-text">Hi, Just wanted to let you ...</div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="icons dropdown">
+                        <a href="javascript:void(0)" data-toggle="dropdown">
+                            <i class="mdi mdi-bell-outline"></i>
+                            <span class="badge badge-pill gradient-2">1</span>
+                        </a>
+                        <div class="drop-down animated fadeIn dropdown-menu dropdown-notfication">
+                            <div class="dropdown-content-heading d-flex justify-content-between">
+                                <span class="">1 New Notifications</span>
+                                <a href="javascript:void()" class="d-inline-block">
+                                    <span class="badge badge-pill gradient-2">1</span>
+                                </a>
+                            </div>
+                            <div class="dropdown-content-body">
+                                <ul>
+                                    <li>
+                                        <a href="javascript:void()">
+                                            <span class="mr-3 avatar-icon bg-success-lighten-2"><i class="icon-present"></i></span>
+                                            <div class="notification-content">
+                                                <h6 class="notification-heading">Events Started</h6>
+                                                <span class="notification-text">Within next 5 days</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="icons dropdown d-none d-md-flex">
+                        <a href="javascript:void(0)" class="log-user"  data-toggle="dropdown">
+                            <span>English</span>
+                            <i class="fa fa-angle-down f-s-14" aria-hidden="true"></i>
+                        </a>
+                        <div class="drop-down dropdown-language animated fadeIn  dropdown-menu">
+                            <div class="dropdown-content-body">
+                                <ul>
+                                    <li><a href="javascript:void()">English</a></li>
+                                    <li><a href="javascript:void()">French</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="icons dropdown">
+                        <div class="user-img c-pointer position-relative" data-toggle="dropdown">
+                            <span class="activity active"></span>
+                            <img src="{{ url_for('static', filename='/images/user/1.png') }}" height="40" width="40" alt="">
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--  Sidebar start  -->
+    <div class="nk-sidebar">
+        <div class="nk-nav-scroll">
+            <ul class="metismenu list-group list-group-flush" id="menu">
+                <li>
+                    <a class="list-group-item" href="{{ url_for('dashboard') }}" aria-expanded="false">
+                        <i class="icon-speedometer menu-icon"></i><span class="nav-text">DASHBOARD</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="list-group-item" href="{{ url_for('settings') }}" aria-expanded="false">
+                        <i class="icon-speedometer menu-icon"></i><span class="nav-text">SETTINGS</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="content-body">
+        {% block content %} {% endblock %}
+    </div>
+    <!--  Footer start  -->
+    <div class="footer">
+        <div class="copyright">
+            <p>Copyright &copy; Designed & Developed by Clement 2022</p>
+        </div>
+    </div>
+    <!--  Scripts  -->
+<!--    <script src="../static/plugins/common/common.min.js"></script>-->
+<!--    <script src="../static/js/custom.min.js"></script>-->
+<!--    <script src="../static/js/settings.js"></script>-->
+<!--    <script src="../static/js/gleek.js"></script>-->
+<!--    <script src="../static/js/styleSwitcher.js"></script>-->
+
+<!--    &lt;!&ndash; Chartjs &ndash;&gt;-->
+<!--    <script src="../static/plugins/chart.js/Chart.bundle.min.js"></script>-->
+<!--    &lt;!&ndash; Circle progress &ndash;&gt;-->
+<!--    <script src="../static/plugins/circle-progress/circle-progress.min.js"></script>-->
+<!--    &lt;!&ndash; Datamap &ndash;&gt;-->
+<!--    <script src="../static/plugins/d3v3/index.js"></script>-->
+<!--    <script src="../static/plugins/topojson/topojson.min.js"></script>-->
+<!--    <script src="../static/plugins/datamaps/datamaps.world.min.js"></script>-->
+<!--    &lt;!&ndash; Morrisjs &ndash;&gt;-->
+<!--    <script src="../static/plugins/raphael/raphael.min.js"></script>-->
+<!--    <script src="../static/plugins/morris/morris.min.js"></script>-->
+<!--    &lt;!&ndash; Pignose Calender &ndash;&gt;-->
+<!--    <script src="../static/plugins/moment/moment.min.js"></script>-->
+<!--    <script src="../static/plugins/pg-calendar/js/pignose.calendar.min.js"></script>-->
+<!--    &lt;!&ndash; ChartistJS &ndash;&gt;-->
+<!--    <script src="../static/plugins/chartist/js/chartist.min.js"></script>-->
+<!--    <script src="../static/plugins/chartist-plugin-tooltips/js/chartist-plugin-tooltip.min.js"></script>-->
+    <script src="{{ url_for('static', filename='/plugins/common/common.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/custom.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/gleek.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/styleSwitcher.js') }}"></script>
+
+    <!-- Chartjs -->
+    <script src="{{ url_for('static', filename='/plugins/chart.js/Chart.bundle.min.js') }}"></script>
+    <!-- Circle progress -->
+    <script src="{{ url_for('static', filename='/plugins/circle-progress/circle-progress.min.js') }}"></script>
+    <!-- Datamap -->
+    <script src="{{ url_for('static', filename='/plugins/d3v3/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='/plugins/topojson/topojson.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/plugins/datamaps/datamaps.world.min.js') }}"></script>
+    <!-- Morrisjs -->
+    <script src="{{ url_for('static', filename='/plugins/raphael/raphael.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/plugins/morris/morris.min.js') }}"></script>
+    <!-- Pignose Calender -->
+    <script src="{{ url_for('static', filename='/plugins/moment/moment.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/plugins/pg-calendar/js/pignose.calendar.min.js') }}"></script>
+    <!-- ChartistJS -->
+    <script src="{{ url_for('static', filename='/plugins/chartist/js/chartist.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='/plugins/chartist-plugin-tooltips/js/chartist-plugin-tooltip.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='/js/dashboard/dashboard-1.js') }}"></script>
+</body>
+</html>

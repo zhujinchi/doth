@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}
+transact
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='/css/transact.css') }}">
+<div class="content-wrapper" style="min-height: 926px;">
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title" style="color:#838383;">Transaction Log</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="transact-info" style="display:inline-flex;">
+                            <h3 class="box-text" style="margin-right:10px;">First Name: {{ f_name }}</h3>
+                            <h3 class="box-text" style="margin-left:10px;">Last Name: {{ l_name }}</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table no-margin table-striped table-hover">
+                                <tbody>
+                                    {% for log in log_list %}
+                                    <tr>
+                                        <td>
+                                            {{ log }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
