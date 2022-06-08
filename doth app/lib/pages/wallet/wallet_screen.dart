@@ -51,13 +51,15 @@ class _WalletScreenState extends State<WalletScreen>
     ///get amountlist of tokens
     assetsAmountList = [];
     for (int i = 0; i < SystemInfo.shared().tokenList.length; i++) {
-      int temp = await Contract().getUserSingleTokenAmount(
+      double temp = await Contract().getUserSingleTokenAmount(
           SystemInfo.shared().tokenList[i].toString());
 
-      if (!assetsAmountList.contains(temp) || temp == 0) {
+      if (!assetsAmountList.contains(temp)) {
         assetsAmountList.add(temp);
       }
     }
+
+    print(assetsAmountList);
 
     ///get valueList of tokens
     assetsValueList = [];
@@ -65,12 +67,11 @@ class _WalletScreenState extends State<WalletScreen>
       int temp = await Contract()
           .getUserSingleTokenValue(SystemInfo.shared().tokenList[i].toString());
 
-      if (!assetsValueList.contains(temp) || temp == 0) {
+      if (!assetsValueList.contains(temp)) {
         assetsValueList.add(temp);
       }
     }
-
-    print(assetsAmountList);
+    print(assetsValueList);
 
     setState(() {});
 

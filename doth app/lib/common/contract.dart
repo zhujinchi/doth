@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -194,7 +195,6 @@ class Contract {
   }
 
   ///repayByCollateral
-
   repayByCollateral(int amount) async {
     MyToast.notice('repayByCollateral api start');
     final client = Web3Client(SystemInfo.shared().rpcUrl, Client());
@@ -310,7 +310,7 @@ class Contract {
     return message;
   }
 
-  Future<int> getUserSingleTokenAmount(String tokenaddress) async {
+  Future<double> getUserSingleTokenAmount(String tokenaddress) async {
     MyToast.notice('getUserSingleTokenAmount api start');
 
     final client = Web3Client(SystemInfo.shared().rpcUrl, Client());
@@ -330,9 +330,14 @@ class Contract {
       EthereumAddress.fromHex(tokenaddress)
     ]);
 
+    print(message);
+
     await client.dispose();
     BigInt temp = message[0];
-    return temp.toInt();
+
+    // temp =  temp ~/ BigInt.from(pow(10, 18));
+
+    return temp.toDouble();
   }
 
   Future<int> getUserSingleTokenValue(String tokenaddress) async {
